@@ -27,6 +27,8 @@ func current_date_for_message() string {
 		strconv.Itoa(currentTime.Second())
 }
 
+var command string 
+
 func main() {
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
@@ -45,16 +47,13 @@ func main() {
 	fmt.Println("Successfully connected!")
 
 	// Example usage of send_db_command_to function
-  var command string 
-	*&command = "CREATE TABLE IF NOT EXISTS LONG_MESSAGES (id SERIAL PRIMARY KEY, message VARCHAR(255), sender VARCHAR(50), date VARCHAR(50))"
+	
+  //create table if does not exist
+  send_db_command_to(db, "CREATE TABLE IF NOT EXISTS LONG_MESSAGES (id SERIAL PRIMARY KEY, message VARCHAR(255), sender VARCHAR(50), date VARCHAR(50))")
   fmt.Println(command)
-	send_db_command_to(db, command)
-  *&command = "INSERT INTO LONG_MESSAGES (message, sender, date) VALUES ('hello there', 'tal', '"+current_date_for_message()+"');" //look at the spceial handling ''
-  fmt.Println(command)
-  send_db_command_to(db, command)
-  *&command = "SELECT * FROM LONG_MESSAGES;"
-  fmt.Println(command)
-  send_db_command_to(db, command)
+  
+  add_message(db, "tal", "hello this is tal")
+  remove_message(db, 5)
 }
 
 func send_db_command_to(db *sql.DB, command string) {
@@ -65,8 +64,12 @@ func send_db_command_to(db *sql.DB, command string) {
 	fmt.Println("Command worked successfully!")
 }
 
-//func get_all_messages() {
-//  send_db_command_to(db, command)
-//}
+func add_message(db *sql.DB, user string, message string) {
+  *&command = "INSERT INTO LONG_MESSAGES (message, sender, date) VALUES ('"+message+"', '"+user+"', '"+current_date_for_message()+"');" //look at the spceial handling ''
+  send_db_command_to(db, command)
+}
 
-//test
+func remove_message(db *sql.DB, message_id int) {
+  *&command = "DELETE FROM LONG_MESSAGES WHERE ID = '"+strconv.Itoa(message_id)+"';" //look at the spceial handling ''
+  send_db_command_to(db, command)
+}
