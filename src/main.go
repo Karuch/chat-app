@@ -55,6 +55,7 @@ func main() {
   add_message(db, "tal", "hello this is tal")
   remove_message(db, 5)
   get_all_messages(db, "tal")
+  get_message(db, 4)
 }
 
 func send_db_command_to(db *sql.DB, command string) {
@@ -65,13 +66,14 @@ func send_db_command_to(db *sql.DB, command string) {
 	fmt.Println("Command worked successfully!")
 }
 
+var (
+  id int
+  sender string
+  message string
+  date string
+)
+
 func send_db_query_to(db *sql.DB, command string) {
-  var (
-    id int
-    sender string
-    message string
-    date string
-  )
   rows, err := db.Query(command)
   if err != nil {
     log.Fatal(err)
@@ -105,4 +107,10 @@ func get_all_messages(db *sql.DB, user string) {
   *&command = "SELECT * FROM LONG_MESSAGES WHERE sender = '"+user+"';" //look at the spceial handling ''
   send_db_query_to(db, command)
 }
+
+func get_message(db *sql.DB, message_id int) {
+  *&command = "SELECT * FROM LONG_MESSAGES WHERE ID = '"+strconv.Itoa(message_id)+"';" //look at the spceial handling ''
+  send_db_query_to(db, command)
+}
+
 
