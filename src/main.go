@@ -68,3 +68,5 @@ func send_db_command_to(db *sql.DB, command string) {
 //func get_all_messages() {
 //  send_db_command_to(db, command)
 //}
+
+//test
