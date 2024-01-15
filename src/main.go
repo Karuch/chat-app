@@ -80,11 +80,11 @@ func send_db_query_to(db *sql.DB, command string) {
   }
   defer rows.Close()
   for rows.Next() {
-    err := rows.Scan(&id, &sender, &message, &date)
+    err := rows.Scan(&id, &message, &sender, &date) //the order will scan the rows by the order they were saved in the db so it matters
     if err != nil {
       log.Fatal(err)
     }
-    fmt.Println(id, sender, message, date)
+    fmt.Println(id,"]", date ,"]", sender,":", message)
   }
   err = rows.Err()
   if err != nil {
