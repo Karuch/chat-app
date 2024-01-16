@@ -48,8 +48,8 @@ func current_date_for_message() string {
 
 var command string 
 
-func send_db_command_to(db *sql.DB, command string) {
-	_, err := db.Exec(command)
+func send_db_command_to(db *sql.DB, command string, args ...interface{}) {
+	_, err := db.Exec(command, args...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,44 +63,48 @@ var (
   date string
 )
 
-func send_db_query_to(db *sql.DB, command string) {
-  rows, err := db.Query(command)
-  if err != nil {
-    log.Fatal(err)
-  }
-  defer rows.Close()
-  for rows.Next() {
-    err := rows.Scan(&id, &message, &sender, &date) //the order will scan the rows by the order they were saved in the db so it matters
-    if err != nil {
-      log.Fatal(err)
-    }
-    fmt.Println(id,"]", date ,"]", sender,":", message)
-  }
-  err = rows.Err()
-  if err != nil {
-    log.Fatal(err)
-  }
+func send_db_query_to(db *sql.DB, command string, args ...interface{}) {
+  rows, err := db.Query(command, args...)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&id, &message, &sender, &date)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		fmt.Println(id, "]", date, "]", sender, ":", message)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 
 func Add_message(db *sql.DB, user string, message string) {
-  *&command = "INSERT INTO LONG_MESSAGES (message, sender, date) VALUES ('"+message+"', '"+user+"', '"+current_date_for_message()+"');" //look at the spceial handling ''
-  send_db_command_to(db, command)
+  *&command = "INSERT INTO LONG_MESSAGES (message, sender, date) VALUES ($1, $2, '"+current_date_for_message()+"');" //look at the spceial handling ''
+  send_db_command_to(db, command, message, user)
 }
 
 func Remove_message(db *sql.DB, message_id int) {
-  *&command = "DELETE FROM LONG_MESSAGES WHERE ID = '"+strconv.Itoa(message_id)+"';" //look at the spceial handling ''
-  send_db_command_to(db, command)
+  *&command = "DELETE FROM LONG_MESSAGES WHERE ID = $1;" //look at the spceial handling ''
+  send_db_command_to(db, command, message_id)
 }
 
 func Get_all_messages(db *sql.DB, user string) {
-  *&command = "SELECT * FROM LONG_MESSAGES WHERE sender = '"+user+"';" //look at the spceial handling ''
-  send_db_query_to(db, command)
+  *&command = "SELECT * FROM LONG_MESSAGES WHERE sender = $1;" //look at the spceial handling ''
+  send_db_query_to(db, command, user)
 }
 
 func Get_message(db *sql.DB, message_id int) {
-  *&command = "SELECT * FROM LONG_MESSAGES WHERE ID = '"+strconv.Itoa(message_id)+"';" //look at the spceial handling ''
-  send_db_query_to(db, command)
+  *&command = "SELECT * FROM LONG_MESSAGES WHERE ID = $1;" //look at the spceial handling ''
+  send_db_query_to(db, command, message_id)
 }
 
 
