@@ -51,8 +51,13 @@ func Delete(ctx context.Context, client *redis.Client, key string, id string){
 	if err := cmd.Err(); err != nil {
 		panic(err)
 	}
+	if cmd.Val() <= 0 {
+		fmt.Println("the id or key", key, id, "was not found")
+	} else {
+		fmt.Println("hdelete was successful.")
+	}
 	println("Fields deleted: ", cmd.Val())
-	fmt.Println("hdelete was successful.")
+	
 }
 
 

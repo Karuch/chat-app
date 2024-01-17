@@ -19,3 +19,11 @@ the iteration cause issues if tries to iterate over HSET etc', I guess it includ
 	}
 
     eaxmple probably 
+
+
+
+  redis.Amount(redis.Ctx, redis.Connect_to_db(), "elad")
+  redis.Getall(redis.Ctx, redis.Connect_to_db(), "elad")
+  redis.Set(redis.Ctx, redis.Connect_to_db(), "elad", common.Random_uuid(), "My  name is eladddd")
+  redis.Delete(redis.Ctx, redis.Connect_to_db(), "elad", common.Random_uuid())
+  redis.Getall(redis.Ctx, redis.Connect_to_db(), "elad")
