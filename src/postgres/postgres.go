@@ -9,6 +9,16 @@ import (
 	_ "github.com/lib/pq"
 )
 
+/*  pg functions to implement in main for later use
+  db := postgres.Connect_to_db()
+  postgres.Add_message(db, "maor", "hello this is tal")
+  postgres.Remove_message(db, 114)
+  postgres.Get_all_messages(db, "' OR 1=1; --")
+  postgres.Get_message(db, 4)
+  defer db.Close() 
+*/
+
+
 const (
 	host     = "172.17.0.2"
 	port     = 5432
