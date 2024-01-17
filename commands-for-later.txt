@@ -1,0 +1,2 @@
+docker run -e POSTGRES_PASSWORD=1598 --name=postgres postgres
+docker run --name=redis -v /home/tal/Desktop/go-chat-app/conf/redis.conf:/etc/redis/redis.conf redis:7.2.4-alpine
