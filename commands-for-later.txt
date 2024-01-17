@@ -38,3 +38,5 @@ the iteration cause issues if tries to iterate over HSET etc', I guess it includ
 
   also I want to change the get specific message in postgres to get amount of messages like in redis
   or maybe add an option to single message also in redis but idk
+  
+  after I done with both need to check if all postgres functions are working
