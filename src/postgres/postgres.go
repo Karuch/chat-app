@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"main/common"
 	_ "github.com/lib/pq"
 )
@@ -17,19 +18,10 @@ import (
   defer db.Close() 
 */
 
-
-const (
-	host     = "172.17.0.2"
-	port     = 5432
-	user     = "postgres"
-	password = "1598"
-	dbname   = "postgres"
-)
-
 func Connect_to_db() *sql.DB {
   psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
   "password=%s dbname=%s sslmode=disable",
-  host, port, user, password, dbname)
+  os.Getenv("POSTGRES_IP"), common.Convert_to_int(os.Getenv("POSTGRES_PORT")), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"))
   db, err := sql.Open("postgres", psqlInfo)
   if err != nil {
     panic(err)

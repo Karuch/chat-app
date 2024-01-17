@@ -9,10 +9,16 @@ import (
 )
 
 func ENVinit(){
-	os.Setenv("REDIS_IP", "172.17.0.2")
-	os.Setenv("REDIS_PORT", "6379")
+	os.Setenv("REDIS_IP", 		"172.17.0.2")
+	os.Setenv("REDIS_PORT", 	"6379")
 	os.Setenv("REDIS_PASSWORD", "1598")
-	os.Setenv("REDIS_DB", "0") //0 means default DB, there's problem to store int will leave it for later
+	os.Setenv("REDIS_DB", 		"0") //0 means default DB, there's problem to store int will leave it for later
+	
+	os.Setenv("POSTGRES_IP",		"172.17.0.2")
+	os.Setenv("POSTGRES_PORT",		"5432")
+	os.Setenv("POSTGRES_USER",		"postgres")
+	os.Setenv("POSTGRES_PASSWORD",	"1598")
+	os.Setenv("POSTGRES_DB",		"postgres")
 }
 
 
