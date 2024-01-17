@@ -5,7 +5,20 @@ import (
   "context"
   "fmt"
   "github.com/redis/go-redis/v9"
+  "time"
+  "strconv"
+  //"github.com/google/uuid"
 )
+
+func current_date_for_message() string {
+	currentTime := time.Now()
+	return strconv.Itoa(currentTime.Year()) + "/" +
+		strconv.Itoa(int(currentTime.Month())) + "/" +
+		strconv.Itoa(currentTime.Day()) + " " +
+		strconv.Itoa(currentTime.Hour()) + ":" +
+		strconv.Itoa(currentTime.Minute()) + ":" + // Change from Hour() to Minute()
+		strconv.Itoa(currentTime.Second())
+}
 
 var ctx context.Context = context.Background()
 
@@ -23,10 +36,55 @@ func main() {
   
   set("foo", "bar", connect_to_db(), ctx)
   del("tal", connect_to_db(), ctx)
-  get("foo", connect_to_db(), ctx)
-  getall(connect_to_db(), ctx)
-  
+  //get("foo", connect_to_db(), ctx)
+  //getall(connect_to_db(), ctx)
+  //testset(ctx, connect_to_db(), "elad", uuid.New().String(), "testiiii")
+  testgetall(ctx, connect_to_db(), "elad")
+  testdel(ctx, connect_to_db(), "elad", "0")
+  testgetall(ctx, connect_to_db(), "elad")
+  amount(ctx, connect_to_db(), "elad")
 }
+
+func testset(ctx context.Context, client *redis.Client, key string, args ...interface{}){
+  err := client.HSet(ctx, key, args).Err()
+  if err != nil {
+      panic(err)
+  }
+  fmt.Println("hset was successful.")
+}
+
+func testgetall(ctx context.Context, client *redis.Client, key string){
+  val, err := client.HGetAll(ctx, key).Result()
+  if err != nil {
+      panic(err)
+  }
+  for keys_inside, value := range val {
+    fmt.Printf("%s] %s] %s: %s\n" ,keys_inside, current_date_for_message(), key, value)
+  }
+  fmt.Println("hget all was successful.")
+}
+
+func testdel(ctx context.Context, client *redis.Client, key string, id string){
+  cmd := client.HDel(ctx, key, id)
+  if err := cmd.Err(); err != nil {
+      panic(err)
+  }
+  println("Fields deleted: ", cmd.Val())
+  fmt.Println("hdelete was successful.")
+}
+
+
+func amount(ctx context.Context, client *redis.Client, key string){
+	fields, err := client.HKeys(ctx, key).Result()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Printf("Number of keys for %s: %d\n", key, len(fields))
+}
+
+
+
 
 
 func get(key string, client *redis.Client, ctx context.Context) string {
@@ -46,6 +104,7 @@ func set(key string, value string, client *redis.Client, ctx context.Context){
   }
   fmt.Println("set was successful.")
 }
+
 
 func getall(client *redis.Client, ctx context.Context) {
   // Start with a cursor of 0

@@ -1,2 +1,21 @@
 docker run -e POSTGRES_PASSWORD=1598 --name=postgres postgres
 docker run --name=redis -v /home/tal/Desktop/go-chat-app/conf/redis.conf:/etc/redis/redis.conf redis:7.2.4-alpine
+
+HSET user:1000 username "maor"
+HGET user:1000 username
+
+HSET user:maor id:1 "hello world I'm maor"
+HGET user:maor id:1
+
+https://redis.uptrace.dev/guide/get-all-keys.html#iterating-over-keys
+the iteration cause issues if tries to iterate over HSET etc', I guess it includes all valus which are not SET
+
+
+	// Set hash field
+	err := storeHashField(client, context.Background(), "user:1000", "username", "john_doe")
+	if err != nil {
+		fmt.Println("Error storing hash field:", err)
+		return
+	}
+
+    eaxmple probably 
