@@ -4,8 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-  "time"
-  "strconv"
+	"main/common"
 	_ "github.com/lib/pq"
 )
 
@@ -43,17 +42,6 @@ func Connect_to_db() *sql.DB {
   }
   fmt.Println("Successfully connected!")
   return db
-}
-
-
-func current_date_for_message() string {
-	currentTime := time.Now()
-	return strconv.Itoa(currentTime.Year()) + "/" +
-		strconv.Itoa(int(currentTime.Month())) + "/" +
-		strconv.Itoa(currentTime.Day()) + " " +
-		strconv.Itoa(currentTime.Hour()) + ":" +
-		strconv.Itoa(currentTime.Minute()) + ":" + // Change from Hour() to Minute()
-		strconv.Itoa(currentTime.Second())
 }
 
 var command string 
@@ -98,7 +86,7 @@ func send_db_query_to(db *sql.DB, command string, args ...interface{}) {
 
 
 func Add_message(db *sql.DB, user string, message string) {
-  *&command = "INSERT INTO LONG_MESSAGES (message, sender, date) VALUES ($1, $2, '"+current_date_for_message()+"');" //look at the spceial handling ''
+  *&command = "INSERT INTO LONG_MESSAGES (message, sender, date) VALUES ($1, $2, '"+common.Current_date_for_message()+"');" //look at the spceial handling ''
   send_db_command_to(db, command, message, user)
 }
 
