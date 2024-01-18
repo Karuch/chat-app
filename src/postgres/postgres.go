@@ -26,7 +26,7 @@ func Connect_to_db() *sql.DB {
   if err != nil {
     panic(err)
   }
-  send_db_command_to(db, "CREATE TABLE IF NOT EXISTS LONG_MESSAGES (id SERIAL PRIMARY KEY, message VARCHAR(255), sender VARCHAR(50), date VARCHAR(50))")
+  send_db_command_to(db, "CREATE TABLE IF NOT EXISTS LONG_MESSAGES (id VARCHAR(50), message VARCHAR(255), sender VARCHAR(50), date VARCHAR(50))")
   //create table if does not exist ^
   err = db.Ping()
   if err != nil {
@@ -47,7 +47,7 @@ func send_db_command_to(db *sql.DB, command string, args ...interface{}) {
 }
 
 var (
-  id int
+  id string
   sender string
   message string
   date string
@@ -78,11 +78,11 @@ func send_db_query_to(db *sql.DB, command string, args ...interface{}) {
 
 
 func Add_message(db *sql.DB, user string, message string) {
-  *&command = "INSERT INTO LONG_MESSAGES (message, sender, date) VALUES ($1, $2, '"+common.Current_date_for_message()+"');" //look at the spceial handling ''
+  *&command = "INSERT INTO LONG_MESSAGES (id, message, sender, date) VALUES ('"+common.Random_uuid()+"', $1, $2, '"+common.Current_date_for_message()+"');" //look at the spceial handling ''
   send_db_command_to(db, command, message, user)
 }
 
-func Remove_message(db *sql.DB, message_id int) {
+func Remove_message(db *sql.DB, message_id string) {
   *&command = "DELETE FROM LONG_MESSAGES WHERE ID = $1;" //look at the spceial handling ''
   send_db_command_to(db, command, message_id)
 }
@@ -92,7 +92,7 @@ func Get_all_messages(db *sql.DB, user string) {
   send_db_query_to(db, command, user)
 }
 
-func Get_message(db *sql.DB, message_id int) {
+func Get_message(db *sql.DB, message_id string) {
   *&command = "SELECT * FROM LONG_MESSAGES WHERE ID = $1;" //look at the spceial handling ''
   send_db_query_to(db, command, message_id)
 }

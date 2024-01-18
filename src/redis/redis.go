@@ -41,7 +41,7 @@ func Getall(ctx context.Context, client *redis.Client, key string){
 		panic(err)
 	}
 	for keys_inside, value := range val {
-		fmt.Printf("%s] %s] %s: %s\n" ,keys_inside, common.Current_date_for_message(), key, value)
+		fmt.Printf("%s ] %s ] %s : %s\n" ,keys_inside, common.Current_date_for_message(), key, value)
 	}
 	fmt.Println("hget all was successful.")
 }
