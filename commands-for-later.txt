@@ -43,3 +43,16 @@ c3111718-ba51-4a11-a6a7-9d14047aaa76 ] 2024/1/18 12:4:58 ] elad : testiiii
 
 
   when don't find desired thing in postgres it won't throw an error, I need to change it
+
+
+
+
+
+
+
+
+    fmt.Println(common.Convert_to_int(os.Getenv("POSTGRES_PORT")))
+  postgres.Get_all_messages(postgres.Connect_to_db(), "maor")
+  postgres.Add_message(postgres.Connect_to_db(), "maor", "olaaa maorrr")
+  postgres.Get_message(postgres.Connect_to_db(), "62bfc1d1-c9db-44bf-aa99-2d600ba1ea34")
+  postgres.Remove_message(postgres.Connect_to_db(), "62bfc1d1-c9db-44bf-aa99-2d600ba1ea34")

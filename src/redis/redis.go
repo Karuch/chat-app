@@ -69,3 +69,19 @@ func Amount(ctx context.Context, client *redis.Client, key string){
 	}
 	fmt.Printf("Number of keys for %s: %d\n", key, len(fields))
 }
+
+
+func Get(ctx context.Context, client *redis.Client, id string){
+	iter := client.Scan(ctx, 0, "*", 0).Iterator()
+	for iter.Next(ctx) {
+		result, err := client.HGet(ctx, iter.Val(), id).Result()
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		fmt.Println(iter.Val(), result)
+	}
+	if err := iter.Err(); err != nil {
+		panic(err)
+	}
+}
