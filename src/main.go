@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"main/postgres"
+	//"main/postgres"
 	//"main/redis"
 	"main/common"
   "os"
