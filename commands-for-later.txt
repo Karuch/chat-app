@@ -45,7 +45,7 @@ c3111718-ba51-4a11-a6a7-9d14047aaa76 ] 2024/1/18 12:4:58 ] elad : testiiii
   when don't find desired thing in postgres it won't throw an error, I need to change it
 
 
-
+  must save date in redis
 
 
 
@@ -56,3 +56,21 @@ c3111718-ba51-4a11-a6a7-9d14047aaa76 ] 2024/1/18 12:4:58 ] elad : testiiii
   postgres.Add_message(postgres.Connect_to_db(), "maor", "olaaa maorrr")
   postgres.Get_message(postgres.Connect_to_db(), "62bfc1d1-c9db-44bf-aa99-2d600ba1ea34")
   postgres.Remove_message(postgres.Connect_to_db(), "62bfc1d1-c9db-44bf-aa99-2d600ba1ea34")
+
+
+
+  HSET message:id1 date "2024-01-18" sender "user1" message "Hello, Redis!"
+
+  172.17.0.2:6379> HGET message:id1 message
+"Hello, Redis!"
+172.17.0.2:6379> HGET message:id1 date
+"2024-01-18"
+172.17.0.2:6379> HGET message:id1 sender
+
+the problem is that this is not good because if I would like to look for messages from specific user it may
+be slow and consume a lot of resources becuase I'll have to search under all the IDs for specific user each time
+so I guess that it will be better to add the date to the message it self and maybe parse it before give it to client
+
+delete look for ID
+getall look for name
+get look for ID

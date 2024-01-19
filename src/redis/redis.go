@@ -27,32 +27,48 @@ func Connect_to_db() *redis.Client { //wonder if that's a good idea it means tha
   return client
 }
 
-func Set(ctx context.Context, client *redis.Client, key string, args ...interface{}){
-	err := client.HSet(ctx, key, args).Err()
-	if err != nil {
-		panic(err)
+func Set(ctx context.Context, client *redis.Client, user string, message string){
+	fields := map[string]interface{}{
+		"date":    common.Current_date_for_message(),
+		"user":  user,
+		"message": message,
 	}
-	fmt.Println("hset was successful.")
+
+	// Use the HSet command to set the values
+	result, err := client.HSet(ctx, common.Random_uuid(), fields).Result()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	// Print the result (1 if a new field was created, 0 if field already existed and was updated)
+	fmt.Println("HSET Result:", result)
 }
 
-func Getall(ctx context.Context, client *redis.Client, key string){
-	val, err := client.HGetAll(ctx, key).Result()
-	if err != nil {
+func Getall(ctx context.Context, client *redis.Client, user string){
+	iter := client.Scan(ctx, 0, "*", 0).Iterator()
+	for iter.Next(ctx) {
+		result, err := client.HGet(ctx, iter.Val(), "user").Result()
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+		if result == user {
+			Get(ctx, client, iter.Val())
+		}
+	}
+	if err := iter.Err(); err != nil {
 		panic(err)
 	}
-	for keys_inside, value := range val {
-		fmt.Printf("%s ] %s ] %s : %s\n" ,keys_inside, common.Current_date_for_message(), key, value)
-	}
-	fmt.Println("hget all was successful.")
 }
 
-func Delete(ctx context.Context, client *redis.Client, key string, id string){
-	cmd := client.HDel(ctx, key, id)
+
+func Delete(ctx context.Context, client *redis.Client, key string){
+	cmd := client.HDel(ctx, key)
 	if err := cmd.Err(); err != nil {
 		panic(err)
 	}
 	if cmd.Val() <= 0 {
-		fmt.Println("the id or key", key, id, "was not found")
+		fmt.Println("the id", key, "was not found")
 	} else {
 		fmt.Println("hdelete was successful.")
 	}
@@ -61,27 +77,32 @@ func Delete(ctx context.Context, client *redis.Client, key string, id string){
 }
 
 
-func Amount(ctx context.Context, client *redis.Client, key string){
-	fields, err := client.HKeys(ctx, key).Result()
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	fmt.Printf("Number of keys for %s: %d\n", key, len(fields))
-}
-
-
-func Get(ctx context.Context, client *redis.Client, id string){
+func Amount(ctx context.Context, client *redis.Client, user string) int {
+	var count int = 0
 	iter := client.Scan(ctx, 0, "*", 0).Iterator()
 	for iter.Next(ctx) {
-		result, err := client.HGet(ctx, iter.Val(), id).Result()
+		result, err := client.HGet(ctx, iter.Val(), "user").Result()
 		if err != nil {
 			fmt.Println("Error:", err)
-			return
 		}
-		fmt.Println(iter.Val(), result)
+		if result == user {
+			count++
+		}
 	}
 	if err := iter.Err(); err != nil {
 		panic(err)
 	}
+	return count
 }
+
+
+func Get(ctx context.Context, client *redis.Client, key string) {
+	result, err := client.HGet(ctx, key, "*").Result()
+	if err != nil {
+		fmt.Println("Error:", err)
+		
+	}
+	fmt.Println(result)
+}
+
+
