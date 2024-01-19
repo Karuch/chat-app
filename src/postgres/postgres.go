@@ -69,7 +69,7 @@ func send_db_query_to(db *sql.DB, command string, args ...interface{}) []string 
       values = append(values, "error")
       return values
 		}
-    values = append(values, fmt.Sprintf(" %v ] %v ] %v : %v", id, date, sender, message))
+    values = append(values, fmt.Sprintf("%v ] %v ] %v : %v", id, date, sender, message))
 	}
 
 	if err := rows.Err(); err != nil {
@@ -77,18 +77,29 @@ func send_db_query_to(db *sql.DB, command string, args ...interface{}) []string 
     values = append(values, "error")
 		return values
 	}
+  if len(values) <= 0 {
+    values = append(values, "nothing was found X_X")
+  }
   return values
 }
 
 
-func Add_message(db *sql.DB, user string, message string) {
-  *&command = "INSERT INTO LONG_MESSAGES (id, message, sender, date) VALUES ('"+common.Random_uuid()+"', $1, $2, '"+common.Current_date_for_message()+"');" //look at the spceial handling ''
+func Add_message(db *sql.DB, user string, message string) string {
+  id = common.Random_uuid()
+  date = common.Current_date_for_message()
+  *&command = "INSERT INTO LONG_MESSAGES (id, message, sender, date) VALUES ('"+id+"', $1, $2, '"+date+"');" //look at the spceial handling ''
   send_db_command_to(db, command, message, user)
+  return fmt.Sprintf("message has been added: %v ] %v ] %v: %v", id, date, sender, message)
 }
 
-func Remove_message(db *sql.DB, message_id string) {
+func Remove_message(db *sql.DB, id string) string {
+  if Get_message(db, id) == "nothing was found X_X" { //check if message exist
+    return "nothing was found X_X"
+  }
+
   *&command = "DELETE FROM LONG_MESSAGES WHERE ID = $1;" //look at the spceial handling ''
-  send_db_command_to(db, command, message_id)
+  send_db_command_to(db, command, id)
+  return fmt.Sprintf("message has been removed: '%v'", id)
   
 }
 
@@ -97,9 +108,9 @@ func Get_all_messages(db *sql.DB, user string) []string {
   return send_db_query_to(db, command, user)
 }
 
-func Get_message(db *sql.DB, message_id string) string{
+func Get_message(db *sql.DB, id string) string{
   *&command = "SELECT * FROM LONG_MESSAGES WHERE ID = $1;" //look at the spceial handling ''
-  return send_db_query_to(db, command, message_id)[0]
+  return send_db_query_to(db, command, id)[0]
 }
 
 
