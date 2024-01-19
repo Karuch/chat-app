@@ -1,3 +1,32 @@
+func check user and pass
+return refresh
+
+
+func check refresh
+return access
+
+
+func check access
+return login
+(will use the username specified in token
+to all quaries)
+
+
+func for logout (just will remove tokens from local computer and stop session if I'll choose sockets)
+
+
+
+about storing cerds in pg, I'll need to hash & salt them before store them
+
+
+
+
+
+
+
+
+
+
 docker run -e POSTGRES_PASSWORD=1598 --name=postgres postgres
 docker run --name=redis -v /home/tal/Desktop/go-chat-app/conf/redis.conf:/etc/redis/redis.conf redis:7.2.4-alpine
 
@@ -46,6 +75,15 @@ c3111718-ba51-4a11-a6a7-9d14047aaa76 ] 2024/1/18 12:4:58 ] elad : testiiii
 
 
   must save date in redis
+
+
+
+
+
+
+
+
+  
 
 
 

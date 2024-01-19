@@ -26,7 +26,7 @@ func Client_connect() *sql.DB {
   if err != nil {
     panic(err)
   }
-  send_db_command_to(db, "CREATE TABLE IF NOT EXISTS LONG_MESSAGES (id VARCHAR(50), message VARCHAR(255), sender VARCHAR(50), date VARCHAR(50))")
+  send_db_command_to(db, "CREATE TABLE IF NOT EXISTS MESSAGE (id VARCHAR(50), message VARCHAR(255), sender VARCHAR(50), date VARCHAR(50))")
   //create table if does not exist ^
   err = db.Ping()
   if err != nil {
@@ -87,7 +87,7 @@ func send_db_query_to(db *sql.DB, command string, args ...interface{}) []string 
 func Add_message(db *sql.DB, user string, message string) string {
   id = common.Random_uuid()
   date = common.Current_date_for_message()
-  *&command = "INSERT INTO LONG_MESSAGES (id, message, sender, date) VALUES ('"+id+"', $1, $2, '"+date+"');" //look at the spceial handling ''
+  *&command = "INSERT INTO MESSAGE (id, message, sender, date) VALUES ('"+id+"', $1, $2, '"+date+"');" //look at the spceial handling ''
   send_db_command_to(db, command, message, user)
   return fmt.Sprintf("message has been added: %v ] %v ] %v: %v", id, date, sender, message)
 }
@@ -97,19 +97,19 @@ func Remove_message(db *sql.DB, id string) string {
     return "nothing was found X_X"
   }
 
-  *&command = "DELETE FROM LONG_MESSAGES WHERE ID = $1;" //look at the spceial handling ''
+  *&command = "DELETE FROM MESSAGE WHERE ID = $1;" //look at the spceial handling ''
   send_db_command_to(db, command, id)
   return fmt.Sprintf("message has been removed: '%v'", id)
   
 }
 
 func Get_all_messages(db *sql.DB, user string) []string {
-  *&command = "SELECT * FROM LONG_MESSAGES WHERE sender = $1;" //look at the spceial handling ''
+  *&command = "SELECT * FROM MESSAGE WHERE sender = $1;" //look at the spceial handling ''
   return send_db_query_to(db, command, user)
 }
 
 func Get_message(db *sql.DB, id string) string{
-  *&command = "SELECT * FROM LONG_MESSAGES WHERE ID = $1;" //look at the spceial handling ''
+  *&command = "SELECT * FROM MESSAGE WHERE ID = $1;" //look at the spceial handling ''
   return send_db_query_to(db, command, id)[0]
 }
 
