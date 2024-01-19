@@ -18,7 +18,7 @@ import (
 
 var Ctx context.Context = context.Background()
 
-func Connect_to_db() *redis.Client { //wonder if that's a good idea it means that the connection will disconnect each time
+func Client_connect() *redis.Client { //wonder if that's a good idea it means that the connection will disconnect each time
   client := redis.NewClient(&redis.Options{ //calling function I think
     Addr:	  fmt.Sprintf("%s:%s", os.Getenv("REDIS_IP"), os.Getenv("REDIS_PORT")),
     Password: os.Getenv("REDIS_PASSWORD"), // no password set

@@ -18,7 +18,7 @@ import (
   defer db.Close() 
 */
 
-func Connect_to_db() *sql.DB {
+func Client_connect() *sql.DB {
   psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
   "password=%s dbname=%s sslmode=disable",
   os.Getenv("POSTGRES_IP"), common.Convert_to_int(os.Getenv("POSTGRES_PORT")), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"))
@@ -43,7 +43,6 @@ func send_db_command_to(db *sql.DB, command string, args ...interface{}) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Command worked successfully!")
 }
 
 var (
@@ -53,27 +52,32 @@ var (
   date string
 )
 
-func send_db_query_to(db *sql.DB, command string, args ...interface{}) {
+func send_db_query_to(db *sql.DB, command string, args ...interface{}) []string {
+  values := []string{}
   rows, err := db.Query(command, args...)
 	if err != nil {
-		log.Fatal(err)
-		return
+    fmt.Println(err)
+    values = append(values, "error")
+		return values
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		err := rows.Scan(&id, &message, &sender, &date)
 		if err != nil {
-			log.Fatal(err)
-			return
+      fmt.Println(err)
+      values = append(values, "error")
+      return values
 		}
-
-		fmt.Println(id, "]", date, "]", sender, ":", message)
+    values = append(values, fmt.Sprintf(" %v ] %v ] %v : %v", id, date, sender, message))
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Fatal(err)
+    fmt.Println(err)
+    values = append(values, "error")
+		return values
 	}
+  return values
 }
 
 
@@ -85,16 +89,17 @@ func Add_message(db *sql.DB, user string, message string) {
 func Remove_message(db *sql.DB, message_id string) {
   *&command = "DELETE FROM LONG_MESSAGES WHERE ID = $1;" //look at the spceial handling ''
   send_db_command_to(db, command, message_id)
+  
 }
 
-func Get_all_messages(db *sql.DB, user string) {
+func Get_all_messages(db *sql.DB, user string) []string {
   *&command = "SELECT * FROM LONG_MESSAGES WHERE sender = $1;" //look at the spceial handling ''
-  send_db_query_to(db, command, user)
+  return send_db_query_to(db, command, user)
 }
 
-func Get_message(db *sql.DB, message_id string) {
+func Get_message(db *sql.DB, message_id string) string{
   *&command = "SELECT * FROM LONG_MESSAGES WHERE ID = $1;" //look at the spceial handling ''
-  send_db_query_to(db, command, message_id)
+  return send_db_query_to(db, command, message_id)[0]
 }
 
 
