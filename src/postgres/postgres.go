@@ -39,7 +39,7 @@ func Client_connect() *sql.DB {
 func send_db_command_to(db *sql.DB, command string, args ...interface{}) {
 	_, err := db.Exec(command, args...)
 	if err != nil {
-		fmt.Println(err)
+		common.CustomErrLog.Println(err)
 	}
 }
 
@@ -54,7 +54,7 @@ func send_db_query_to(db *sql.DB, command string, args ...interface{}) []string 
   values := []string{}
   rows, err := db.Query(command, args...)
 	if err != nil {
-    fmt.Println(err)
+    common.CustomErrLog.Println(err)
     values = append(values, "error")
 		return values
 	}
@@ -63,7 +63,7 @@ func send_db_query_to(db *sql.DB, command string, args ...interface{}) []string 
 	for rows.Next() {
 		err := rows.Scan(&id, &message, &user, &date)
 		if err != nil {
-      fmt.Println(err)
+      common.CustomErrLog.Println(err)
       values = append(values, "error")
       return values
 		}
@@ -71,7 +71,7 @@ func send_db_query_to(db *sql.DB, command string, args ...interface{}) []string 
 	}
 
 	if err := rows.Err(); err != nil {
-    fmt.Println(err)
+    common.CustomErrLog.Println(err)
     values = append(values, "error")
 		return values
 	}
