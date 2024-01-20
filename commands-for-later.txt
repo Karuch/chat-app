@@ -38,7 +38,7 @@ so errors
 
 need to check later what's the deal with message and long message table in pg
 
-
+also later need to add to redis nothing was found string to return to client
 
 
 

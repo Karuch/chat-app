@@ -3,7 +3,6 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 	"main/common"
 	_ "github.com/lib/pq"
@@ -42,7 +41,7 @@ var command string
 func send_db_command_to(db *sql.DB, command string, args ...interface{}) {
 	_, err := db.Exec(command, args...)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 }
 
