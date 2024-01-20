@@ -33,3 +33,53 @@ func Create_user(db *sql.DB, username string, password string) string{
 	return fmt.Sprintf("'%s' Registered successfully.", username)
 }
 
+func Validate_user(db *sql.DB, username string, password string) (string, bool) {
+	rows, err := db.Query("SELECT hash, salt FROM USERS WHERE username = $1;", username)
+	if err != nil {
+		fmt.Println(err)
+	}
+	var db_hash []byte;
+	var db_salt []byte;
+	for rows.Next() {
+		err := rows.Scan(&db_hash, &db_salt)
+			if err != nil {
+	  		fmt.Println(err)
+
+		}
+	}
+	text, user_is_valid := common.HnSCompare(common.ArgonObject, db_hash, db_salt, []byte(password))
+	return text, user_is_valid
+}
+
+func Send_db_query_to(db *sql.DB, command string, args ...interface{}) []string {
+	values := []string{}
+	rows, err := db.Query(command, args...)
+	  if err != nil {
+	  fmt.Println(err)
+	  values = append(values, "error")
+		  return values
+	  }
+	  defer rows.Close()
+  
+	  for rows.Next() {
+		  err := rows.Scan(&id, &message, &sender, &date)
+		  if err != nil {
+		fmt.Println(err)
+		values = append(values, "error")
+		return values
+		  }
+	  values = append(values, fmt.Sprintf("%v ] %v ] %v : %v", id, date, sender, message))
+	  }
+  
+	  if err := rows.Err(); err != nil {
+	  fmt.Println(err)
+	  values = append(values, "error")
+		  return values
+	  }
+	if len(values) <= 0 {
+	  values = append(values, "nothing was found X_X")
+	}
+	return values
+  }
+
+

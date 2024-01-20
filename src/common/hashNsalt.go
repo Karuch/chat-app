@@ -106,13 +106,13 @@ func HnSObject() *Argon2idHash {
 
 var ArgonObject = HnSObject()
 
-func HnSCompare(argon2IDHash *Argon2idHash ,hash []byte, salt []byte, password []byte) string {
+func HnSCompare(argon2IDHash *Argon2idHash ,hash []byte, salt []byte, password []byte) (string, bool) {
 	err := argon2IDHash.Compare(hash, salt, password)
 	if err != nil {
 		fmt.Println(err)
-		return "invalid username or password"
+		return "invalid username or password", false
 	}
-	return "good - argon2IDHash Password and Hash match (should change this later)"
+	return "good - argon2IDHash Password and Hash match (should change this later)", true
 }
 
 func HnSGenerate(password []byte, argon2IDHash *Argon2idHash) *HashSalt {
