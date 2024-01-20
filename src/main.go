@@ -22,5 +22,7 @@ func main() {
         }
     }()
 
+	fmt.Println(auth.Create_user(postgres.Client_connect(), "maor", "1qaz3edc"))
+	fmt.Println(auth.Validate_user(postgres.Client_connect(), "maor", "1qaz3edc"))
 
 }
