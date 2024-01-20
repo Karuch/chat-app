@@ -4,14 +4,11 @@ import (
 	"fmt"
 	"main/common"
 	"os"
-
 	"github.com/golang-jwt/jwt"
 )
 
 type UserClaims struct {
- Id    string `json:"id"`
- First string `json:"first"`
- Last  string `json:"last"`
+ Username string `json:"Username"`
  jwt.StandardClaims
 }
 
@@ -66,7 +63,7 @@ func Validate_refresh(parsedRefreshToken *jwt.StandardClaims) bool {
 		fmt.Println("refresh is not valid")
         return false
 	} 
-    fmt.Println("access is valid")
+    fmt.Println("refresh is valid")
     return true
 }
 

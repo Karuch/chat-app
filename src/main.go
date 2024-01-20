@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"main/common"
 	"main/jwtHandler"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -15,12 +14,16 @@ import (
 func main() {
 	common.ENVinit()
   
+    defer func() {
+        if r := recover(); r != nil {
+        	common.CustomErrLog.Println("Recovered from PANIC", r)
+        }
+    }()
+
 	// user login validation should occur here
   
 	userClaims := jwtHandler.UserClaims{
-		Id:    "01H4EKGQSY5637MQP395283JR8",
-		First: "Leeroy",
-		Last:  "Jenkins",
+		Username: "Leeroy",
 		StandardClaims: jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
 		ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
@@ -38,9 +41,25 @@ func main() {
 	fmt.Println(access)
 	fmt.Println(refresh)
 	
-	jwtHandler.Validate_refresh(jwtHandler.ParseRefreshToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDU5NTYwNjYsImlhdCI6MTcwNTc4MzI2Nn0.s1j5clJx6us6Af5MExGJ8ey2bkl445UNJY_6wO7gFI8"))
-	fmt.Println(os.Getenv("TOKEN_SECRET"))
-	
+	check_access_token(access)
+	check_refresh_token(refresh)
+
 }
 
+func check_access_token(accesstoken string){
+	parsedAccessToken := jwtHandler.ParseAccessToken(accesstoken)
+	if jwtHandler.Validate_access(parsedAccessToken) {
+		//allow user use it's user name to do stuff
+	} else {
+		//ask user for refresh token then check it
+	}
+}
 
+func check_refresh_token(refreshtoken string){
+	parsedRefreshToken := jwtHandler.ParseRefreshToken(refreshtoken)
+	if jwtHandler.Validate_refresh(parsedRefreshToken) {
+		//send user accesstoken then check if it's valid
+	} else {
+		//ask user to login again
+	}
+}
