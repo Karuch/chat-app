@@ -12,6 +12,8 @@ import (
 var CustomErrLog = log.New(os.Stderr, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile|log.LUTC)
 
 func ENVinit(){
+	os.Setenv("TOKEN_SECRET", 		"hello")
+
 	os.Setenv("REDIS_IP", 		"172.17.0.2")
 	os.Setenv("REDIS_PORT", 	"6379")
 	os.Setenv("REDIS_PASSWORD", "1598")
