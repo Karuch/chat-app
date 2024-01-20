@@ -27,6 +27,7 @@ func Client_connect() *sql.DB {
     panic(err)
   }
   send_db_command_to(db, "CREATE TABLE IF NOT EXISTS MESSAGE (id VARCHAR(50), message VARCHAR(255), sender VARCHAR(50), date VARCHAR(50))")
+  send_db_command_to(db, "CREATE TABLE IF NOT EXISTS USERS (id VARCHAR(50), username VARCHAR(50), password BYTEA")
   //create table if does not exist ^
   err = db.Ping()
   if err != nil {

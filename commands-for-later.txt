@@ -18,6 +18,27 @@ func for logout (just will remove tokens from local computer and stop session if
 
 about storing cerds in pg, I'll need to hash & salt them before store them
 
+https://snyk.io/blog/secure-password-hashing-in-go/
+
+in the future I'll also need to limit the client length of username and password
+
+
+holy shit it is possible to genereate toug pg UUID like IDs for each column
+
+
+
+
+so errors
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -38,7 +59,7 @@ HGET user:maor id:1
 
 https://redis.uptrace.dev/guide/get-all-keys.html#iterating-over-keys
 the iteration cause issues if tries to iterate over HSET etc', I guess it includes all valus which are not SET
-
+CREATECREATE TABLE IF NOT EXISTS USERS (id VARCHAR(50), username VARCHAR(50), password BYTEA TABLE IF NOT EXISTS USERS (id VARCHAR(50), username VARCHAR(50), password BYTEA
 
 	// Set hash field
 	err := storeHashField(client, context.Background(), "user:1000", "username", "john_doe")
