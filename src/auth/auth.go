@@ -1,10 +1,11 @@
-package postgres
+package auth
 
 import (
 	"database/sql"
 	"fmt"
 	"main/common"
 	"github.com/lib/pq"
+	"main/jwtHandler"
 )
 
 
@@ -50,4 +51,20 @@ func Validate_user(db *sql.DB, username string, password string) (string, bool) 
 	return text, user_is_valid
 }
 
+func Check_access_token(accesstoken string){
+	parsedAccessToken := jwtHandler.ParseAccessToken(accesstoken)
+	if jwtHandler.Validate_access(parsedAccessToken) {
+		//allow user use it's user name to do stuff
+	} else {
+		//ask user for refresh token then check it
+	}
+}
 
+func Check_refresh_token(refreshtoken string){
+	parsedRefreshToken := jwtHandler.ParseRefreshToken(refreshtoken)
+	if jwtHandler.Validate_refresh(parsedRefreshToken) {
+		//send user accesstoken then check if it's valid
+	} else {
+		//ask user to login again
+	}
+}
