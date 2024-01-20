@@ -9,5 +9,5 @@ import (
 
 func main() {
 	common.ENVinit()
-	fmt.Println(postgres.Create_user(postgres.Client_connect(), "ta", "1qaz2wwsx"))
+	fmt.Println(postgres.Create_user(postgres.Client_connect(), "taa", "1qaz2wwsx"))
 }
