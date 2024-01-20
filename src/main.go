@@ -1,28 +1,38 @@
 package main
 
 import (
-	"fmt"
-	"main/auth"
 	"main/common"
-	
-	"main/postgres"
+	"encoding/json"
+    "fmt"
 
+	
 
 	
 	//"main/postgres"
 )
 
+type Bird struct {
+	Specie string
+	Descriptio string
+}
 
 func main() {
 	common.ENVinit()
-  
-    defer func() {
-        if r := recover(); r != nil {
-        	common.CustomErrLog.Println("Recovered from PANIC", r)
-        }
-    }()
+	birdJson := `[{"species":"pigeon","description":"likes to perch on rocks"},{"species":"eagle","description":"bird of prey"}]`
+	var birds []Bird
+	json.Unmarshal([]byte(birdJson), &birds)
+	fmt.Println(birds[1].Descriptio)
+	//Birds : [{Species:pigeon Description:} {Species:eagle Description:bird of prey}]
+	
 
-	fmt.Println(auth.Create_user(postgres.Client_connect(), "maor", "1qaz3edc"))
-	fmt.Println(auth.Validate_user(postgres.Client_connect(), "maor", "1qaz3edc"))
+
+
 
 }
+
+
+/*defer func() {
+	if r := recover(); r != nil {
+		common.CustomErrLog.Println("Recovered from PANIC", r)
+	}
+}()*/
