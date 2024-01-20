@@ -51,35 +51,4 @@ func Validate_user(db *sql.DB, username string, password string) (string, bool) 
 	return text, user_is_valid
 }
 
-func Send_db_query_to(db *sql.DB, command string, args ...interface{}) []string {
-	values := []string{}
-	rows, err := db.Query(command, args...)
-	  if err != nil {
-	  fmt.Println(err)
-	  values = append(values, "error")
-		  return values
-	  }
-	  defer rows.Close()
-  
-	  for rows.Next() {
-		  err := rows.Scan(&id, &message, &sender, &date)
-		  if err != nil {
-		fmt.Println(err)
-		values = append(values, "error")
-		return values
-		  }
-	  values = append(values, fmt.Sprintf("%v ] %v ] %v : %v", id, date, sender, message))
-	  }
-  
-	  if err := rows.Err(); err != nil {
-	  fmt.Println(err)
-	  values = append(values, "error")
-		  return values
-	  }
-	if len(values) <= 0 {
-	  values = append(values, "nothing was found X_X")
-	}
-	return values
-  }
-
 
