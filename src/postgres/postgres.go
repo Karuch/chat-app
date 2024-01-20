@@ -36,8 +36,6 @@ func Client_connect() *sql.DB {
   return db
 }
 
-var command string 
-
 func send_db_command_to(db *sql.DB, command string, args ...interface{}) {
 	_, err := db.Exec(command, args...)
 	if err != nil {
@@ -47,7 +45,7 @@ func send_db_command_to(db *sql.DB, command string, args ...interface{}) {
 
 var (
   id string
-  sender string
+  user string
   message string
   date string
 )
@@ -63,13 +61,13 @@ func send_db_query_to(db *sql.DB, command string, args ...interface{}) []string 
 	defer rows.Close()
 
 	for rows.Next() {
-		err := rows.Scan(&id, &message, &sender, &date)
+		err := rows.Scan(&id, &message, &user, &date)
 		if err != nil {
       fmt.Println(err)
       values = append(values, "error")
       return values
 		}
-    values = append(values, fmt.Sprintf("%v ] %v ] %v : %v", id, date, sender, message))
+    values = append(values, fmt.Sprintf("%v ] %v ] %v : %v", id, date, user, message))
 	}
 
 	if err := rows.Err(); err != nil {
@@ -87,9 +85,9 @@ func send_db_query_to(db *sql.DB, command string, args ...interface{}) []string 
 func Add_message(db *sql.DB, user string, message string) string {
   id = common.Random_uuid()
   date = common.Current_date_for_message()
-  *&command = "INSERT INTO MESSAGE (id, message, sender, date) VALUES ('"+id+"', $1, $2, '"+date+"');" //look at the spceial handling ''
+  command := "INSERT INTO MESSAGE (id, message, sender, date) VALUES ('"+id+"', $1, $2, '"+date+"');" //look at the spceial handling ''
   send_db_command_to(db, command, message, user)
-  return fmt.Sprintf("message has been added: %v ] %v ] %v: %v", id, date, sender, message)
+  return fmt.Sprintf("message has been added: %v ] %v ] %v: %v", id, date, user, message)
 }
 
 func Remove_message(db *sql.DB, id string) string {
@@ -97,19 +95,19 @@ func Remove_message(db *sql.DB, id string) string {
     return "nothing was found X_X"
   }
 
-  *&command = "DELETE FROM MESSAGE WHERE ID = $1;" //look at the spceial handling ''
+  command := "DELETE FROM MESSAGE WHERE ID = $1;" //look at the spceial handling ''
   send_db_command_to(db, command, id)
-  return fmt.Sprintf("message has been removed: '%v'", id)
+  return fmt.Sprintf("message ID '%s' has been deleted successfully.", id)
   
 }
 
 func Get_all_messages(db *sql.DB, user string) []string {
-  *&command = "SELECT * FROM MESSAGE WHERE sender = $1;" //look at the spceial handling ''
+  command := "SELECT * FROM MESSAGE WHERE sender = $1;" //look at the spceial handling ''
   return send_db_query_to(db, command, user)
 }
 
 func Get_message(db *sql.DB, id string) string{
-  *&command = "SELECT * FROM MESSAGE WHERE ID = $1;" //look at the spceial handling ''
+  command := "SELECT * FROM MESSAGE WHERE ID = $1;" //look at the spceial handling ''
   return send_db_query_to(db, command, id)[0]
 }
 

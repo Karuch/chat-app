@@ -45,7 +45,7 @@ func Set(ctx context.Context, client *redis.Client, user string, message string)
 
 	// Print the result (1 if a new field was created, 0 if field already existed and was updated)
 	
-	return fmt.Sprintf("add message: %v ] %v ] %v : %v\n", id, fields["date"], fields["user"], fields["message"])
+	return fmt.Sprintf("message has been added: %v ] %v ] %v : %v\n", id, fields["date"], fields["user"], fields["message"])
 }
 
 
@@ -76,7 +76,7 @@ func Delete(ctx context.Context, client *redis.Client, key string) string {
 		return "error"
 	}
 	if exists_key_check != 1 {
-		return fmt.Sprintf("message ID '%s' does not exist.\n", key)
+		return fmt.Sprintf("nothing was found X_X")
 	}
 	//actual function v
 
@@ -95,7 +95,7 @@ func Get(ctx context.Context, client *redis.Client, key string) string {
 		return "error"
 	}
 	if exists_key_check != 1 {
-		return fmt.Sprintf("message ID '%s' does not exist.\n", key)
+		return fmt.Sprintf("nothing was found X_X")
 	}
 	//actual function v
 	
