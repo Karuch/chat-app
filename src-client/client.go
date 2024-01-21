@@ -33,3 +33,22 @@ func read_file(fileName string, path string){
    fmt.Println(string(content))
 }
 
+func handle_server_answer(token string, status string){
+    switch status {
+    case "login_is_true":
+        fmt.Println("login is correct.")
+    case "login_is_wrong":
+        fmt.Println("username or password invalid. try again")
+    case "access_is_true":
+        fmt.Println("accesstoken true")
+	case "access_is_wrong":
+        fmt.Println("accesstoken wrong")
+	case "refresh_is_true":
+        fmt.Println("refreshtoken true")
+	case "refresh_is_wrong":
+        fmt.Println("refreshtoken wrong")
+	case "half_time_refresh":
+		fmt.Println("half_time_refresh")
+    }
+}
+
