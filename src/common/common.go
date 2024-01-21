@@ -13,6 +13,8 @@ var CustomErrLog = log.New(os.Stderr, "ERROR ", log.Ldate|log.Ltime|log.Lshortfi
 
 func ENVinit(){
 	os.Setenv("TOKEN_SECRET", 		"hello")
+	os.Setenv("ACCESS_EXP_MIN", 		"15")
+	os.Setenv("REFRESH_EXP_MIN", 		"2880")
 
 	os.Setenv("REDIS_IP", 		"172.17.0.2")
 	os.Setenv("REDIS_PORT", 	"6379")
@@ -24,9 +26,20 @@ func ENVinit(){
 	os.Setenv("POSTGRES_USER",		"postgres")
 	os.Setenv("POSTGRES_PASSWORD",	"1598")
 	os.Setenv("POSTGRES_DB",		"postgres")
+
+	EnvVarDeclare()
 }
 
+var (
+	Refresh_exp_min int
+	Access_exp_min int
+)
 
+func EnvVarDeclare(){
+	*&Refresh_exp_min = Convert_to_int(os.Getenv("REFRESH_EXP_MIN"))
+	*&Access_exp_min = Convert_to_int(os.Getenv("ACCESS_EXP_MIN"))
+	fmt.Println("init", Refresh_exp_min, Access_exp_min)
+}
 
 func Current_date_for_message() string {
 	currentTime := time.Now()

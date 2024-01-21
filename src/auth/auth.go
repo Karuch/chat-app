@@ -6,6 +6,7 @@ import (
 	"main/common"
 	"github.com/lib/pq"
 	"main/jwtHandler"
+	"time"
 )
 
 
@@ -77,3 +78,14 @@ func Check_refresh_token(refreshtoken string){
 	}
 	return
 }
+
+func Check_half_life_refresh_need_new(refreshtoken string){
+	parsedRefreshToken := jwtHandler.ParseRefreshToken(refreshtoken)
+	expiresAtTime := time.Unix(parsedRefreshToken.ExpiresAt, 0)
+	secondsDifference := time.Until(expiresAtTime).Seconds()
+	if float64(common.Refresh_exp_min*60/2) < secondsDifference/2 {
+		fmt.Println("reach")
+		//generate new refresh send status to user half_time_refresh
+	}
+}
+
