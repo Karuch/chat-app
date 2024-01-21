@@ -6,12 +6,13 @@ import (
 	"main/common"
 	"github.com/lib/pq"
 	"main/jwtHandler"
+	
 	"time"
 )
 
 
 func Create_user(db *sql.DB, username string, password string) string{
-	hashSalt := common.HnSGenerate([]byte(password), common.ArgonObject)
+	hashSalt := HnSGenerate([]byte(password), ArgonObject)
 
 	_, err := db.Exec("INSERT INTO USERS (username, hash, salt) VALUES ($1, $2, $3);", username, hashSalt.Hash, hashSalt.Salt)
 	if err != nil {
@@ -48,7 +49,7 @@ func Validate_userpass(db *sql.DB, username string, password string) {
 			common.CustomErrLog.Println(err)
 		}
 	}
-	text, user_is_valid := common.HnSCompare(common.ArgonObject, db_hash, db_salt, []byte(password))
+	text, user_is_valid := HnSCompare(ArgonObject, db_hash, db_salt, []byte(password))
 	fmt.Println(text)
 	if user_is_valid {
 		//send user refresh with status login_is_true
