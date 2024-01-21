@@ -1,34 +1,30 @@
 package main
 
 import (
-	"main/common"
 	"encoding/json"
-    "fmt"
-
-	
-
-	
+	"fmt"
+	"main/auth"
+	"main/common"
+	"time"
 	//"main/postgres"
 )
 
 type Bird struct {
-	Specie string
-	Descriptio string
+	Species     string
+	Description string
+	CreatedAt   time.Time
 }
 
 func main() {
 	common.ENVinit()
-	birdJson := `[{"species":"pigeon","description":"likes to perch on rocks"},{"species":"eagle","description":"bird of prey"}]`
-	var birds []Bird
-	json.Unmarshal([]byte(birdJson), &birds)
-	fmt.Println(birds[1].Descriptio)
-	//Birds : [{Species:pigeon Description:} {Species:eagle Description:bird of prey}]
-	
-
-
-
-
+	birdJson := `{"species": "pigeon","description": "likes to perch on rocks", "createdAt": "2021-10-18T11:08:47.577Z"}`
+	var bird Bird
+	json.Unmarshal([]byte(birdJson), &bird)
+	fmt.Println(bird.CreatedAt)
+	// {pigeon likes to perch on rocks 2021-10-18 11:08:47.577 +0000 UTC}
+	fmt.Println(auth.Check_refresh_token(jwtHandler.n))
 }
+
 
 
 /*defer func() {

@@ -34,7 +34,7 @@ func Create_user(db *sql.DB, username string, password string) string{
 	return fmt.Sprintf("'%s' Registered successfully.", username)
 }
 
-func Validate_user(db *sql.DB, username string, password string) (string, bool) {
+func Validate_userpass(db *sql.DB, username string, password string) {
 	rows, err := db.Query("SELECT hash, salt FROM USERS WHERE username = $1;", username)
 	if err != nil {
 		common.CustomErrLog.Println(err)
@@ -48,23 +48,32 @@ func Validate_user(db *sql.DB, username string, password string) (string, bool) 
 		}
 	}
 	text, user_is_valid := common.HnSCompare(common.ArgonObject, db_hash, db_salt, []byte(password))
-	return text, user_is_valid
+	fmt.Println(text)
+	if user_is_valid {
+		//send user refresh with status login_is_true
+	} else {
+		//send user with status login_is_wrong
+	}
+	return 
 }
 
 func Check_access_token(accesstoken string){
 	parsedAccessToken := jwtHandler.ParseAccessToken(accesstoken)
 	if jwtHandler.Validate_access(parsedAccessToken) {
-		//allow user use it's user name to do stuff
+		//allow user use it's user name to do stuff with status access_is_true
 	} else {
-		//ask user for refresh token then check it
+		//ask user for refresh token then check it with status access_is_wrong
 	}
+	return
 }
 
 func Check_refresh_token(refreshtoken string){
 	parsedRefreshToken := jwtHandler.ParseRefreshToken(refreshtoken)
+	fmt.Println(parsedRefreshToken)
 	if jwtHandler.Validate_refresh(parsedRefreshToken) {
-		//send user accesstoken then check if it's valid
+		//send user accesstoken then check if it's with status refresh_is_true
 	} else {
-		//ask user to login again
+		//ask user to login again with status refresh_is_wrong
 	}
+	return
 }
