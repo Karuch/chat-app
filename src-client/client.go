@@ -5,9 +5,11 @@ import (
 	"os"
  )
  
+var path string = "/home/tal/Desktop/go-chat-app/src-client/"
+
 //create main function to execute the program
 func main() {
-	var path string = "/home/tal/Desktop/go-chat-app/src-client/"
+	
 	create_file("access.txt", "tokenaccess", path)
 	read_file("access.txt", path)
 }
@@ -36,18 +38,27 @@ func read_file(fileName string, path string){
 func handle_server_answer(token string, status string){
     switch status {
     case "login_is_true":
+		//will get and create refresh
+		create_file("refresh.txt", token, path)
         fmt.Println("login is correct.")
     case "login_is_wrong":
+		//will try login
         fmt.Println("username or password invalid. try again")
     case "access_is_true":
+		//will do nothing
         fmt.Println("accesstoken true")
 	case "access_is_wrong":
+		//will try request
         fmt.Println("accesstoken wrong")
 	case "refresh_is_true":
+		//will get and create access
+		create_file("access.txt", token, path)
         fmt.Println("refreshtoken true")
 	case "refresh_is_wrong":
         fmt.Println("refreshtoken wrong")
+		//will try login
 	case "half_time_refresh":
+		//will get and create refresh and get and create access
 		fmt.Println("half_time_refresh")
     }
 }
