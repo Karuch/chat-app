@@ -2,38 +2,52 @@ package auth
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"main/common"
-	"github.com/lib/pq"
 	"main/jwtHandler"
-	
 	"time"
+	
+	"github.com/golang-jwt/jwt"
+	"github.com/lib/pq"
 )
 
+var UserClaims = jwtHandler.UserClaims{
+	Username: "Leeroy",
+	StandardClaims: jwt.StandardClaims{
+	IssuedAt:  time.Now().Unix(),
+	ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
+	},
+}
 
-func Create_user(db *sql.DB, username string, password string) string{
+
+
+
+func Create_user(db *sql.DB, username string, password string) (string, error) {
 	hashSalt := HnSGenerate([]byte(password), ArgonObject)
 
 	_, err := db.Exec("INSERT INTO USERS (username, hash, salt) VALUES ($1, $2, $3);", username, hashSalt.Hash, hashSalt.Salt)
 	if err != nil {
-		common.CustomErrLog.Println(err)
 		// Analyze the PostgreSQL error
 		pqErr, ok := err.(*pq.Error)
 		if !ok {
 			// Not a PostgreSQL error
-			common.CustomErrLog.Println(err)
-			return ""
+			common.CustomErrLog.Println(pqErr)
+			return "", errors.New("an unkonwn error occurred")
+		} else if pqErr.Code == "23505" {
+			return "A", errors.New("Username is already taken!")
+		} else if pqErr.Code == "23514" {
+			return "", errors.New("Username is too short (need to be at least 3 characters)")
+		} else {
+			common.CustomErrLog.Println(pqErr)
+			return "", errors.New("an unknown error occured2")
 		}
-		// Check for unique violation (23505) and handle custom errors
-		if pqErr.Code == "23505" {
-			return "Username is already taken!"
-		}
-		// Check for check constraint violation and handle custom errors
-		if pqErr.Code == "23514" {
-			return "Username is too short (need to be at least 3 characters)"
-		}
+		
+
+
+		common.CustomErrLog.Println(err)
 	}
-	return fmt.Sprintf("'%s' Registered successfully.", username)
+	return fmt.Sprintf("'%s' Registered successfully.", username), nil
 }
 
 func Validate_userpass(db *sql.DB, username string, password string) {
@@ -90,3 +104,11 @@ func Check_half_life_refresh_need_new(refreshtoken string){
 	}
 }
 
+func Refresh_claim_creator(user string) jwt.StandardClaims {
+	var RefreshClaims = jwt.StandardClaims{
+		Subject:	user,
+		IssuedAt:  time.Now().Unix(),
+		ExpiresAt: time.Now().Add(time.Minute * time.Duration(common.Refresh_exp_min)).Unix(),
+	}
+	return RefreshClaims
+}
