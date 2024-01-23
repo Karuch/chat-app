@@ -5,13 +5,13 @@ import (
 	"main/auth"
 	"main/common"
 	"main/postgres"
-
+	
 	//"main/postgres"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-
+	
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,44 +41,45 @@ func main() {
 }	
 
 
-type Client_login struct {
-	User string `json:"user"`
-	Password string `json:"password"`
-}
+var Client_response map[string]interface{}
 
-
-type Client_response struct {
-	Body string `json:"Body"`
-	Authorization string `json:"Authorization"`
-}
-
-
-func response_handler(c *gin.Context, ) Client_login {
+func response_handler(c *gin.Context, ) map[string]interface{} {
 	ResponsejsonData, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		// Handle error
 	}
 	
-	var client_login Client_login
-
-	err = json.Unmarshal(ResponsejsonData, &client_login)
+	err = json.Unmarshal(ResponsejsonData, &Client_response)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	
-	return client_login
+	return Client_response
 }
 
-
-
 func createUserHandler(c *gin.Context) { //user/create
+	
+	user, is_field_valid := response_handler(c)["User"].(string)
+	if !is_field_valid {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "Error: invalid request",
+		})
+		common.CustomErrLog.Println("the packet don't have password field")
+	}
+	pass, is_field_valid := response_handler(c)["Password"].(string)
+	if !is_field_valid {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "Error: invalid request",
+		})
+		common.CustomErrLog.Println("the packet don't have password field")
+	}
+	
+	str := auth.Create_user(postgres.Client_connect(), user, pass)
 	// Handle response
 	c.JSON(http.StatusOK, gin.H{
-		"status": "Request sent successfully",
-		"token": "token",
+		"status": str,
+		"token": "",
 	})
-	fmt.Println(auth.Create_user(postgres.Client_connect(), response_handler(c).User, response_handler(c).Password))
-	fmt.Println(postgres.Get_all_messages(postgres.Client_connect(), "guyz"))
+	
 }
 
 func loginUserHandler(c *gin.Context) {
