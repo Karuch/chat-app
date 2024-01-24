@@ -3,6 +3,7 @@ package main
 import (
 	//"encoding/json"
 	//"fmt"
+	//"fmt"
 	"main/auth"
 	"main/common"
 	"main/jwtHandler"
@@ -10,7 +11,7 @@ import (
 
 	//"main/postgres"
 	"encoding/json"
-	"fmt"
+
 	"io"
 	"net/http"
 
@@ -43,43 +44,45 @@ func main() {
 }	
 
 
-var Client_response map[string]interface{}
-
-func response_handler(c *gin.Context, ) map[string]interface{} {
+func response_handler(c *gin.Context, ) *map[string]interface{} {
 	ResponsejsonData, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		// Handle error
-	}
-	
-	err = json.Unmarshal(ResponsejsonData, &Client_response)
-	if err != nil {
-		fmt.Println(ResponsejsonData)
-		fmt.Println(Client_response)
 		common.CustomErrLog.Println(err)
 	}
-	return Client_response
+
+	var Client_response map[string]interface{}
+	client_response_pointer := &Client_response
+	err = json.Unmarshal(ResponsejsonData, client_response_pointer)
+	if err != nil {
+		common.CustomErrLog.Println(err)
+	}
+	
+	return client_response_pointer
 }
 
 func createUserHandler(c *gin.Context) { //user/create
-	
-	user, is_field_valid := response_handler(c)["User"].(string)
+	map_of_user_data := response_handler(c)
+
+	user, is_field_valid := (*map_of_user_data)["User"].(string)
 	if !is_field_valid {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "Error: invalid request",
 		})
 		common.CustomErrLog.Println("the packet don't have user field")
+		return
 	}
-	pass, is_field_valid := response_handler(c)["Password"].(string)
+	pass, is_field_valid := (*map_of_user_data)["Password"].(string)
 	if !is_field_valid {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "Error: invalid request",
 		})
 		common.CustomErrLog.Println("the packet don't have password field")
+		return
 	}
 	
 	str, err := auth.Create_user(postgres.Client_connect(), user, pass)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusConflict, gin.H{
 			"status": err.Error(),
 		})
 		return
@@ -89,12 +92,13 @@ func createUserHandler(c *gin.Context) { //user/create
 	token, err := jwtHandler.NewRefreshToken(auth.Refresh_claim_creator(user))
 	if err != nil {
 		common.CustomErrLog.Println(err)
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"status": "Error: Unknown",
 		})
+		return
 	}
 	
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusCreated, gin.H{
 		"status": str,
 		"token": token,
 	})

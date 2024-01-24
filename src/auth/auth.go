@@ -7,7 +7,6 @@ import (
 	"main/common"
 	"main/jwtHandler"
 	"time"
-	
 	"github.com/golang-jwt/jwt"
 	"github.com/lib/pq"
 )
@@ -35,17 +34,17 @@ func Create_user(db *sql.DB, username string, password string) (string, error) {
 			common.CustomErrLog.Println(pqErr)
 			return "", errors.New("an unkonwn error occurred")
 		} else if pqErr.Code == "23505" {
-			return "A", errors.New("Username is already taken!")
+			return "", errors.New("username is already taken")
 		} else if pqErr.Code == "23514" {
-			return "", errors.New("Username is too short (need to be at least 3 characters)")
+			return "", errors.New("username is too short (need to be at least 3 characters)")
 		} else {
-			common.CustomErrLog.Println(pqErr)
-			return "", errors.New("an unknown error occured2")
+			common.CustomErrLog.Println(err)
+			return "", errors.New("an unknown error occured")
 		}
 		
 
 
-		common.CustomErrLog.Println(err)
+		
 	}
 	return fmt.Sprintf("'%s' Registered successfully.", username), nil
 }
