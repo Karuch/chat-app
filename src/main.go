@@ -12,7 +12,7 @@ import (
 	//"main/postgres"
 	"encoding/json"
 
-	"io"
+	//"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -44,23 +44,22 @@ func main() {
 }	
 
 
-func response_handler(c *gin.Context, ) *map[string]interface{} {
+func response_handler(c *gin.Context, ) map[string]interface{} {
 
-	var Client_response map[string]interface{}
-	client_response_pointer := &Client_response
+    clientResponse := make(map[string]interface{})
 
-	err := json.NewDecoder(c.Request.Body).Decode(&client_response_pointer)
-	if err != nil {
-		common.CustomErrLog.Println(err)
-	}
-	
-	return client_response_pointer
+    err := json.NewDecoder(c.Request.Body).Decode(&clientResponse)
+    if err != nil {
+        return nil
+    }
+
+    return clientResponse
 }
 
 func createUserHandler(c *gin.Context) { //user/create
 	map_of_user_data := response_handler(c)
 
-	user, is_field_valid := (*map_of_user_data)["User"].(string)
+	user, is_field_valid := (map_of_user_data)["User"].(string)
 	if !is_field_valid {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "Error: invalid request",
@@ -68,7 +67,7 @@ func createUserHandler(c *gin.Context) { //user/create
 		common.CustomErrLog.Println("the packet don't have user field")
 		return
 	}
-	pass, is_field_valid := (*map_of_user_data)["Password"].(string)
+	pass, is_field_valid := (map_of_user_data)["Password"].(string)
 	if !is_field_valid {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "Error: invalid request",
