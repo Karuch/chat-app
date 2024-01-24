@@ -45,14 +45,11 @@ func main() {
 
 
 func response_handler(c *gin.Context, ) *map[string]interface{} {
-	ResponsejsonData, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		common.CustomErrLog.Println(err)
-	}
 
 	var Client_response map[string]interface{}
 	client_response_pointer := &Client_response
-	err = json.Unmarshal(ResponsejsonData, client_response_pointer)
+
+	err := json.NewDecoder(c.Request.Body).Decode(&client_response_pointer)
 	if err != nil {
 		common.CustomErrLog.Println(err)
 	}
