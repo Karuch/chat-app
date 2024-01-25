@@ -65,3 +65,17 @@ func Convert_to_int(str string) int {
 	return val
 }
 
+// CustomError is a custom type that implements the error interface.
+type CserverSideErr struct {	//those are errors client should not be aware, the msg will be returned as unknown error
+    Message string				//the status will be 500 server fault
+}
+
+// Error returns the error message for CustomError.
+func (e *CserverSideErr) Error() string {
+    return e.Message
+}
+
+// Function that returns an instance of CustomError.
+func ServerSideCustom_Error(str string) error {
+    return &CserverSideErr{Message: str}
+}

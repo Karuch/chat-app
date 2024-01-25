@@ -39,7 +39,7 @@ func Create_user(db *sql.DB, username string, password string) (string, error) {
 			return "", errors.New("username is too short (need to be at least 3 characters)")
 		} else {
 			common.CustomErrLog.Println(err)
-			return "", errors.New("an unknown error occured")
+			return "", errors.New("an unknown error occurred")
 		}
 		
 
@@ -49,27 +49,29 @@ func Create_user(db *sql.DB, username string, password string) (string, error) {
 	return fmt.Sprintf("'%s' Registered successfully.", username), nil
 }
 
-func Validate_userpass(db *sql.DB, username string, password string) {
-	rows, err := db.Query("SELECT hash, salt FROM USERS WHERE username = $1;", username)
-	if err != nil {
+func Validate_userpass(db *sql.DB, username string, password string) (error) { //there's a problem with the way this
+	rows, err := db.Query("SELECT hash, salt FROM USERS WHERE username = $1;", username)	//function is built can't
+	if err != nil {																//return correct status
 		common.CustomErrLog.Println(err)
+		return common.ServerSideCustom_Error("an unknown error occured")
 	}
 	var db_hash []byte;
 	var db_salt []byte;
 	for rows.Next() {
 		err := rows.Scan(&db_hash, &db_salt)
-			if err != nil {
+		if err != nil {
 			common.CustomErrLog.Println(err)
+			return common.ServerSideCustom_Error("an unknown error occured")
 		}
 	}
-	text, user_is_valid := HnSCompare(ArgonObject, db_hash, db_salt, []byte(password))
-	fmt.Println(text)
+	_, user_is_valid := HnSCompare(ArgonObject, db_hash, db_salt, []byte(password))
+	
 	if user_is_valid {
 		//send user refresh with status login_is_true
 	} else {
 		//send user with status login_is_wrong
 	}
-	return 
+	return nil
 }
 
 func Check_access_token(accesstoken string){

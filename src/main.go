@@ -2,8 +2,7 @@ package main
 
 import (
 	//"encoding/json"
-	//"fmt"
-	//"fmt"
+	"fmt"
 	"main/auth"
 	"main/common"
 	"main/jwtHandler"
@@ -103,8 +102,52 @@ func createUserHandler(c *gin.Context) { //user/create
 }
 
 func loginUserHandler(c *gin.Context) {
-	// Handle the "/user/login" endpoint logic
-	c.JSON(http.StatusOK, gin.H{"message": "User logged in"})
+	map_of_user_data := response_handler(c)
+
+	user, is_field_valid := (map_of_user_data)["User"].(string)
+	if !is_field_valid {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"body": "Error: invalid request",
+		})
+		common.CustomErrLog.Println("the packet don't have user field")
+		return 
+	}
+	pass, is_field_valid := (map_of_user_data)["Password"].(string)
+	if !is_field_valid {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"body": "Error: invalid request",
+		})
+		common.CustomErrLog.Println("the packet don't have password field")
+		return 
+	}
+	
+	err := auth.Validate_userpass(postgres.Client_connect(), user, pass)
+	if _, ok := err.(*common.CserverSideErr); ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"body": err.Error(),
+		})
+		return 
+	} else if err != nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"body": err.Error(),
+		})
+		return 
+	}
+	
+	token, err := jwtHandler.NewRefreshToken(auth.Refresh_claim_creator(user))
+	if err != nil {
+		common.CustomErrLog.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"body": "Error: Unknown",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "login_is_true",
+		"body": fmt.Sprintf("You are successfully logged in as '%s'", user),
+		"token": token,
+	})
 }
 
 
