@@ -69,7 +69,7 @@ func Validate_userpass(db *sql.DB, username string, password string) (error) { /
 	return nil
 }
 
-func Check_access_token(accesstoken string){
+/*func Check_access_token(accesstoken string){
 	parsedAccessToken := jwtHandler.ParseAccessToken(accesstoken)
 	if jwtHandler.Validate_access(parsedAccessToken) {
 		//allow user use it's user name to do stuff with status access_is_true
@@ -80,7 +80,7 @@ func Check_access_token(accesstoken string){
 }
 
 func Check_refresh_token(refreshtoken string){
-	parsedRefreshToken := jwtHandler.ParseRefreshToken(refreshtoken)
+	parsedRefreshToken, err := jwtHandler.ParseRefreshToken(refreshtoken)
 	fmt.Println(parsedRefreshToken)
 	if jwtHandler.Validate_refresh(parsedRefreshToken) {
 		//send user accesstoken then check if it's with status refresh_is_true
@@ -88,10 +88,13 @@ func Check_refresh_token(refreshtoken string){
 		//ask user to login again with status refresh_is_wrong
 	}
 	return
-}
+}*/
 
 func Check_half_life_refresh_need_new(refreshtoken string){
-	parsedRefreshToken := jwtHandler.ParseRefreshToken(refreshtoken)
+	parsedRefreshToken, err := jwtHandler.ParseRefreshToken(refreshtoken)
+	if err != nil {
+		return
+	}
 	expiresAtTime := time.Unix(parsedRefreshToken.ExpiresAt, 0)
 	secondsDifference := time.Until(expiresAtTime).Seconds()
 	if float64(common.Refresh_exp_min*60/2) < secondsDifference/2 {

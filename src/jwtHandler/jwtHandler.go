@@ -5,6 +5,7 @@ import (
 	"main/common"
 	"os"
 	"github.com/golang-jwt/jwt"
+    "errors"
 )
 
 type UserClaims struct {
@@ -24,20 +25,41 @@ func NewRefreshToken(claims jwt.StandardClaims) (string, error) {
     return refreshToken.SignedString([]byte(os.Getenv("TOKEN_SECRET")))
 }
 
-func ParseAccessToken(accessToken string) *UserClaims {
-    parsedAccessToken, _ := jwt.ParseWithClaims(accessToken, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-        return []byte(os.Getenv("TOKEN_SECRET")), nil
-    })
+func ParseAccessToken(accessToken string) (*UserClaims, error) {
+	parsedAccessToken, err := jwt.ParseWithClaims(accessToken, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("TOKEN_SECRET")), nil
+	})
 
-    return parsedAccessToken.Claims.(*UserClaims)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing access token: %v", err)
+	}
+
+	if claims, ok := parsedAccessToken.Claims.(*UserClaims); ok && parsedAccessToken.Valid {
+		return claims, nil
+	}
+
+	return nil, fmt.Errorf("Invalid access token")
 }
 
-func ParseRefreshToken(refreshToken string) *jwt.StandardClaims {
-    parsedRefreshToken, _ := jwt.ParseWithClaims(refreshToken, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+func ParseRefreshToken(refreshToken string) (*jwt.StandardClaims, error) {
+    parsedRefreshToken, err := jwt.ParseWithClaims(refreshToken, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
         return []byte(os.Getenv("TOKEN_SECRET")), nil
     })
-    
-    return parsedRefreshToken.Claims.(*jwt.StandardClaims)
+
+    if err != nil {
+        return nil, err
+    }
+
+    if parsedRefreshToken == nil || !parsedRefreshToken.Valid {
+        return nil, errors.New("Invalid refresh token")
+    }
+
+    claims, ok := parsedRefreshToken.Claims.(*jwt.StandardClaims)
+    if !ok {
+        return nil, errors.New("Invalid refresh token claims type")
+    }
+
+    return claims, nil
 }
 
 func New_signed_access_token(userClaims UserClaims) string {

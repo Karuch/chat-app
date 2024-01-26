@@ -23,12 +23,13 @@ import (
 
 func main() {
 	common.ENVinit()
+
 	// Create a new Gin router
 	router := gin.Default()
 
 	// Create a route group for "/user"
 	userGroup := router.Group("/user")
-	//longMSgGroup := router.Group("/longmsg")
+	longMsgGroup := router.Group("/longmsg")
 
 	// Define the "/user/create" endpoint
 	userGroup.POST("/create", createUserHandler)
@@ -36,7 +37,7 @@ func main() {
 	// Define the "/user/login" endpoint
 	userGroup.POST("/login", loginUserHandler)
 
-	//longMsgGroup.GET("/get", longGet)
+	longMsgGroup.GET("/getall", longGetAll)
 
 	// Run the server on port 8080
 	err := router.Run(":8080")
@@ -156,57 +157,80 @@ func loginUserHandler(c *gin.Context) {
 
 
 
-func longGet(c *gin.Context) { //user/create
+func longGetAll(c *gin.Context) { //longMsg/getall
 	
-	//jwtHandler.Validate_refresh(jwtHandler.ParseRefreshToken()){
-
-	//}
-	
+	err, haveAccess, username := tokenRecognizer(c)
+	fmt.Println(username)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{									//done auth success
+			"body": fmt.Sprintf("You need to login"),
+		})
+		return
+	}
+	if haveAccess {
+		all_messages := postgres.Get_all_messages(postgres.Client_connect(), username)
+		fmt.Println(all_messages)
+		c.JSON(http.StatusUnauthorized, gin.H{									//done auth success
+			"body": all_messages,
+		})
+	}
 }
 
 
-func tokenRecognizer(c *gin.Context, token string) error {
-	
+func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function return true only if access works even if ref work it won't true
+	var token string = c.GetHeader("token")
 	var tokenType string = c.GetHeader("tokenType") 
 	if tokenType == "refresh" {
-		if jwtHandler.Validate_refresh(jwtHandler.ParseRefreshToken(token)) {
-			newToken, err := jwtHandler.NewAccessToken(auth.AccessClaimCreator(jwtHandler.ParseRefreshToken(token).Subject))
+		parsedToken, err := jwtHandler.ParseRefreshToken(token)
+		if err != nil {
+			return err, false, ""
+		}
+		if jwtHandler.Validate_refresh(parsedToken) {
+			newToken, err := jwtHandler.NewAccessToken(auth.AccessClaimCreator(parsedToken.Subject))
 			if err != nil {
 				common.CustomErrLog.Println(err)
-				c.JSON(http.StatusOK, gin.H{
+				c.JSON(http.StatusUnauthorized, gin.H{
 					"status": "refresh_is_wrong",
 					"body": "an unknown error occurred, try again",
 				})
-				return err
+				return err, false, ""
 			}
 			c.JSON(http.StatusOK, gin.H{
 				"status": "refresh_is_true",
 				"body": newToken,
 			})
+			return nil, false, ""
 		} else {
-			c.JSON(http.StatusOK, gin.H{
+			c.JSON(http.StatusUnauthorized, gin.H{
 				"status": "refresh_is_wrong",
 				"body": "token is invalid, try login",
 			})
+			return nil, false, ""
 		}
-		return nil
+		
 	} else if tokenType == "access" {
-		if jwtHandler.Validate_access(jwtHandler.ParseAccessToken(token)) { //need to get to this later case when user
+		parsedToken, err := jwtHandler.ParseAccessToken(token)
+		if err != nil {
+			return err, false, ""
+		}
+		if jwtHandler.Validate_access(parsedToken) { //need to get to this later case when user
 			c.JSON(http.StatusOK, gin.H{									//done auth success
 				"status": "access_is_true",
 				"body": "",
 			})
+			return nil, true, parsedToken.Username
 		} else {
-			c.JSON(http.StatusOK, gin.H{
+			c.JSON(http.StatusUnauthorized, gin.H{
 				"status": "access_is_wrong",
 				"body": "token is invalid, try refresh",
 			})
+			return nil, false, ""
 		}
-		return nil
+		
 
 	}
 	common.CustomErrLog.Println("unknown behavior of validate refresh if got here")
-	return nil
+	return nil, false, ""
 }
 
 
