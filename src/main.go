@@ -191,14 +191,23 @@ func tokenRecognizer(c *gin.Context, token string) error {
 		}
 		return nil
 	} else if tokenType == "access" {
-		jwtHandler.Validate_access(jwtHandler.ParseAccessToken(tokenType))
+		if jwtHandler.Validate_access(jwtHandler.ParseAccessToken(token)) { //need to get to this later case when user
+			c.JSON(http.StatusOK, gin.H{									//done auth success
+				"status": "access_is_true",
+				"body": "",
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "access_is_wrong",
+				"body": "token is invalid, try refresh",
+			})
+		}
 		return nil
-	} else {
 
-		return nil
 	}
+	common.CustomErrLog.Println("unknown behavior of validate refresh if got here")
+	return nil
 }
-
 
 
 
