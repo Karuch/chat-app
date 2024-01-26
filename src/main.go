@@ -28,12 +28,15 @@ func main() {
 
 	// Create a route group for "/user"
 	userGroup := router.Group("/user")
+	//longMSgGroup := router.Group("/longmsg")
 
 	// Define the "/user/create" endpoint
 	userGroup.POST("/create", createUserHandler)
 
 	// Define the "/user/login" endpoint
 	userGroup.POST("/login", loginUserHandler)
+
+	//longMsgGroup.GET("/get", longGet)
 
 	// Run the server on port 8080
 	err := router.Run(":8080")
@@ -43,7 +46,7 @@ func main() {
 }	
 
 
-func response_handler(c *gin.Context) map[string]interface{} {
+func respBodyHandler(c *gin.Context) map[string]interface{} {
 
     clientResponse := make(map[string]interface{})
 
@@ -56,7 +59,7 @@ func response_handler(c *gin.Context) map[string]interface{} {
 }
 
 func createUserHandler(c *gin.Context) { //user/create
-	map_of_user_data := response_handler(c)
+	map_of_user_data := respBodyHandler(c)
 
 	user, is_field_valid := (map_of_user_data)["User"].(string)
 	if !is_field_valid {
@@ -102,7 +105,7 @@ func createUserHandler(c *gin.Context) { //user/create
 }
 
 func loginUserHandler(c *gin.Context) {
-	map_of_user_data := response_handler(c)
+	map_of_user_data := respBodyHandler(c)
 
 	user, is_field_valid := (map_of_user_data)["User"].(string)
 	if !is_field_valid {
@@ -150,6 +153,63 @@ func loginUserHandler(c *gin.Context) {
 		"token": token,
 	})
 }
+
+
+
+func longGet(c *gin.Context) { //user/create
+	
+	//jwtHandler.Validate_refresh(jwtHandler.ParseRefreshToken()){
+
+	//}
+	
+}
+
+
+func tokenRecognizer(c *gin.Context, token string) error {
+	
+	var tokenType string = c.GetHeader("tokenType") 
+	if tokenType == "refresh" {
+		if jwtHandler.Validate_refresh(jwtHandler.ParseRefreshToken(token)) {
+			newToken, err := jwtHandler.NewAccessToken(auth.AccessClaimCreator(jwtHandler.ParseRefreshToken(token).Subject))
+			if err != nil {
+				common.CustomErrLog.Println(err)
+				c.JSON(http.StatusOK, gin.H{
+					"status": "refresh_is_wrong",
+					"body": "an unknown error occurred, try again",
+				})
+				return err
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"status": "refresh_is_true",
+				"body": newToken,
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "refresh_is_wrong",
+				"body": "token is invalid, try login",
+			})
+		}
+		return nil
+	} else if tokenType == "access" {
+		jwtHandler.Validate_access(jwtHandler.ParseAccessToken(tokenType))
+		return nil
+	} else {
+
+		return nil
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

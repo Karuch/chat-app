@@ -11,13 +11,7 @@ import (
 	"github.com/lib/pq"
 )
 
-var UserClaims = jwtHandler.UserClaims{
-	Username: "Leeroy",
-	StandardClaims: jwt.StandardClaims{
-	IssuedAt:  time.Now().Unix(),
-	ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
-	},
-}
+
 
 
 
@@ -113,4 +107,15 @@ func Refresh_claim_creator(user string) jwt.StandardClaims {
 		ExpiresAt: time.Now().Add(time.Minute * time.Duration(common.Refresh_exp_min)).Unix(),
 	}
 	return RefreshClaims
+}
+
+func AccessClaimCreator(user string) jwtHandler.UserClaims {
+	var UserClaims = jwtHandler.UserClaims{
+		Username: user,
+		StandardClaims: jwt.StandardClaims{
+		IssuedAt:  time.Now().Unix(),
+		ExpiresAt: time.Now().Add(time.Minute * time.Duration(common.Access_exp_min)).Unix(),
+		},
+	}
+	return UserClaims
 }
