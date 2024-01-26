@@ -129,6 +129,7 @@ func loginUserHandler(c *gin.Context) {
 		return 
 	} else if err != nil {
 		c.JSON(http.StatusConflict, gin.H{
+			"status": "login_is_wrong",
 			"body": err.Error(),
 		})
 		return 

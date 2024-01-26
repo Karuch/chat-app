@@ -70,6 +70,7 @@ func Validate_userpass(db *sql.DB, username string, password string) (error) { /
 		//send user refresh with status login_is_true
 	} else {
 		//send user with status login_is_wrong
+		return errors.New("username or password invalid")
 	}
 	return nil
 }
