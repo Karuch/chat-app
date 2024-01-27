@@ -192,7 +192,7 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 				common.CustomErrLog.Println(err)
 				c.JSON(http.StatusUnauthorized, gin.H{
 					"status": "refresh_is_wrong",
-					"body": "an unknown error occurred, try again",
+					"body": "failute: an unknown error occurred, try again",
 				})
 				return err, false, ""
 			}
@@ -204,7 +204,7 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status": "refresh_is_wrong",
-				"body": "token is invalid, try login",
+				"body": "failure: token is invalid, try login",
 			})
 			return nil, false, ""
 		}
@@ -212,29 +212,26 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 	} else if tokenType == "access" {
 		parsedToken, err := jwtHandler.ParseAccessToken(token)
 		if err != nil {
-			fmt.Println(err)
-			fmt.Println("reacch1")
-			return err, false, ""
-		}
-		if jwtHandler.Validate_access(parsedToken) { //need to get to this later case when user
-			c.JSON(http.StatusOK, gin.H{									//done auth success
-				"status": "access_is_true",
-			})
-			fmt.Println("reacch2")
-			return nil, true, parsedToken.Username
-		} else {
-			fmt.Println("reacch3")
+			common.CustomErrLog.Println(err)
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status": "access_is_wrong",
-				"body": "token is invalid, try refreshxxxxxxxxxxxxxxxxxxxxxxx",
+				"body": "failure: token is invalid, try refresh",
 			})
-			return nil, false, ""
+			return err, false, ""
 		}
-		
+		c.JSON(http.StatusOK, gin.H{									
+			"status": "access_is_true",
+		})
+		return nil, true, parsedToken.Username
 
+	} else {
+		common.CustomErrLog.Println("if it gots here it probably means that client changed manually tokentype")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "login_is_wrong", //umm probably change this later
+			"body": "failure: invalid request",
+		})
+		return nil, false, ""
 	}
-	common.CustomErrLog.Println("unknown behavior of validate refresh if got here")
-	return nil, false, ""
 }
 
 
