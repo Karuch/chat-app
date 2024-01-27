@@ -160,7 +160,7 @@ func loginUserHandler(c *gin.Context) {
 
 func longGetAll(c *gin.Context) { //longMsg/getall
 	
-	err, haveAccess, username := tokenRecognizer(c)
+	haveAccess, username, err := tokenRecognizer(c)
 	fmt.Println(username)
 	if err != nil {	//force to login state
 		common.CustomErrLog.Println(err) //may cause x2 
@@ -176,7 +176,7 @@ func longGetAll(c *gin.Context) { //longMsg/getall
 }
 
 
-func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function return true only if access works even if ref work it won't true
+func tokenRecognizer(c *gin.Context) (bool, string, error) { //this function return true only if access works even if ref work it won't true
 	var token string = c.GetHeader("token")
 	var tokenType string = c.GetHeader("tokenType") 
 	if tokenType == "refresh" {
@@ -187,7 +187,7 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 				"status": "refresh_is_wrong",
 				"body": "failure: token is invalid, try login",
 			})
-			return err, false, ""
+			return false, "", err
 		}
 		
 		newToken, err := jwtHandler.NewAccessToken(auth.AccessClaimCreator(parsedToken.Subject))
@@ -196,13 +196,13 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 				"status": "refresh_is_wrong",
 				"body": "failue: an unknown error occurred, try again",
 			})
-			return err, false, ""
+			return false, "", err
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": "refresh_is_true",
 			"body": newToken,
 		})
-		return nil, false, ""
+		return false, "", nil
 		
 	} else if tokenType == "access" {
 
@@ -212,12 +212,12 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 				"status": "access_is_wrong",
 				"body": "failure: token is invalid or expire, try refresh",
 			})
-			return err, false, ""
+			return false, "", err
 		}
 		c.JSON(http.StatusOK, gin.H{									
 			"status": "access_is_true",
 		})
-		return nil, true, parsedToken.Username
+		return true, parsedToken.Username, nil
 
 	} else {
 
@@ -226,7 +226,7 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 			"status": "access_is_wrong", //umm probably change this later
 			"body": "failure: invalid request",
 		})
-		return errors.New("tokenType of 'access' or 'refresh' was not found"), false, ""
+		return false, "", errors.New("tokenType of 'access' or 'refresh' was not found")
 
 	}
 }
