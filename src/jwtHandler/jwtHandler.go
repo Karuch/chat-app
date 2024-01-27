@@ -31,14 +31,11 @@ func ParseAccessToken(accessToken string) (*UserClaims, error) {
 	})
 
 	if err != nil {
+        fmt.Println("reach erorrrrrr rduddeeeeee")
 		return nil, fmt.Errorf("Error parsing access token: %v", err)
 	}
 
-	if claims, ok := parsedAccessToken.Claims.(*UserClaims); ok && parsedAccessToken.Valid {
-		return claims, nil
-	}
-
-	return nil, fmt.Errorf("Invalid access token")
+	return parsedAccessToken.Claims.(*UserClaims), nil
 }
 
 func ParseRefreshToken(refreshToken string) (*jwt.StandardClaims, error) {

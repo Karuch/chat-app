@@ -161,9 +161,9 @@ func longGetAll(c *gin.Context) { //longMsg/getall
 	
 	err, haveAccess, username := tokenRecognizer(c)
 	fmt.Println(username)
-	if err != nil {
+	if err != nil {	//force to login state
 		c.JSON(http.StatusUnauthorized, gin.H{									//done auth success
-			"body": fmt.Sprintf("You need to login"),
+			"body": fmt.Sprintf("Token invalid or expire"),	
 		})
 		return
 	}
@@ -185,6 +185,7 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 		if err != nil {
 			return err, false, ""
 		}
+		
 		if jwtHandler.Validate_refresh(parsedToken) {
 			newToken, err := jwtHandler.NewAccessToken(auth.AccessClaimCreator(parsedToken.Subject))
 			if err != nil {
@@ -211,18 +212,21 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 	} else if tokenType == "access" {
 		parsedToken, err := jwtHandler.ParseAccessToken(token)
 		if err != nil {
+			fmt.Println(err)
+			fmt.Println("reacch1")
 			return err, false, ""
 		}
 		if jwtHandler.Validate_access(parsedToken) { //need to get to this later case when user
 			c.JSON(http.StatusOK, gin.H{									//done auth success
 				"status": "access_is_true",
-				"body": "",
 			})
+			fmt.Println("reacch2")
 			return nil, true, parsedToken.Username
 		} else {
+			fmt.Println("reacch3")
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status": "access_is_wrong",
-				"body": "token is invalid, try refresh",
+				"body": "token is invalid, try refreshxxxxxxxxxxxxxxxxxxxxxxx",
 			})
 			return nil, false, ""
 		}
