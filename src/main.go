@@ -161,19 +161,38 @@ func loginUserHandler(c *gin.Context) {
 func longGetAll(c *gin.Context) { //longMsg/getall
 	
 	haveAccess, username, err := tokenRecognizer(c)
-	fmt.Println(username)
+	
 	if err != nil {	//force to login state
-		common.CustomErrLog.Println(err) //may cause x2 
+		common.CustomErrLog.Println(err)  
 		return
 	}
 	if haveAccess {
 		all_messages := postgres.Get_all_messages(postgres.Client_connect(), username)
-		fmt.Println(all_messages)
 		c.JSON(http.StatusUnauthorized, gin.H{									//done auth success
 			"body": all_messages,
 		})
 	}
 }
+
+
+func longGet(c *gin.Context) { //longMsg/get
+	
+	haveAccess, username, err := tokenRecognizer(c)
+	
+	if err != nil {	//force to login state
+		common.CustomErrLog.Println(err) 
+		return
+	}
+	if haveAccess {
+		message := postgres.Get_message(postgres.Client_connect(), username)
+		c.JSON(http.StatusUnauthorized, gin.H{									//done auth success
+			"body": all_messages,
+		})
+	}
+}
+
+
+
 
 
 func tokenRecognizer(c *gin.Context) (bool, string, error) { //this function return true only if access works even if ref work it won't true
