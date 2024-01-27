@@ -5,7 +5,7 @@ import (
 	"main/common"
 	"os"
 	"github.com/golang-jwt/jwt"
-    "errors"
+   
 )
 
 type UserClaims struct {
@@ -16,18 +16,18 @@ type UserClaims struct {
 func NewAccessToken(claims UserClaims) (string, error) {
     accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-    return accessToken.SignedString([]byte(os.Getenv("TOKEN_SECRET")))
+    return accessToken.SignedString([]byte(os.Getenv("TOKEN_SECRET_ACCESS")))
 }
 
 func NewRefreshToken(claims jwt.StandardClaims) (string, error) {
     refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-    return refreshToken.SignedString([]byte(os.Getenv("TOKEN_SECRET")))
+    return refreshToken.SignedString([]byte(os.Getenv("TOKEN_SECRET_REFRESH")))
 }
 
 func ParseAccessToken(accessToken string) (*UserClaims, error) {
 	parsedAccessToken, err := jwt.ParseWithClaims(accessToken, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("TOKEN_SECRET")), nil
+		return []byte(os.Getenv("TOKEN_SECRET_ACCESS")), nil
 	})
 
 	if err != nil {
@@ -40,23 +40,15 @@ func ParseAccessToken(accessToken string) (*UserClaims, error) {
 
 func ParseRefreshToken(refreshToken string) (*jwt.StandardClaims, error) {
     parsedRefreshToken, err := jwt.ParseWithClaims(refreshToken, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-        return []byte(os.Getenv("TOKEN_SECRET")), nil
+        return []byte(os.Getenv("TOKEN_SECRET_REFRESH")), nil
     })
 
     if err != nil {
         return nil, err
     }
 
-    if parsedRefreshToken == nil || !parsedRefreshToken.Valid {
-        return nil, errors.New("Invalid refresh token")
-    }
-
-    claims, ok := parsedRefreshToken.Claims.(*jwt.StandardClaims)
-    if !ok {
-        return nil, errors.New("Invalid refresh token claims type")
-    }
-
-    return claims, nil
+    fmt.Println("reachhhhh")
+    return parsedRefreshToken.Claims.(*jwt.StandardClaims), nil
 }
 
 func New_signed_access_token(userClaims UserClaims) string {

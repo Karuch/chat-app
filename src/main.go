@@ -2,6 +2,7 @@ package main
 
 import (
 	//"encoding/json"
+	"errors"
 	"fmt"
 	"main/auth"
 	"main/common"
@@ -162,9 +163,7 @@ func longGetAll(c *gin.Context) { //longMsg/getall
 	err, haveAccess, username := tokenRecognizer(c)
 	fmt.Println(username)
 	if err != nil {	//force to login state
-		c.JSON(http.StatusUnauthorized, gin.H{									//done auth success
-			"body": fmt.Sprintf("Token invalid or expire"),	
-		})
+		common.CustomErrLog.Println(err) //may cause x2 
 		return
 	}
 	if haveAccess {
@@ -181,41 +180,37 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 	var token string = c.GetHeader("token")
 	var tokenType string = c.GetHeader("tokenType") 
 	if tokenType == "refresh" {
+
 		parsedToken, err := jwtHandler.ParseRefreshToken(token)
 		if err != nil {
-			return err, false, ""
-		}
-		
-		if jwtHandler.Validate_refresh(parsedToken) {
-			newToken, err := jwtHandler.NewAccessToken(auth.AccessClaimCreator(parsedToken.Subject))
-			if err != nil {
-				common.CustomErrLog.Println(err)
-				c.JSON(http.StatusUnauthorized, gin.H{
-					"status": "refresh_is_wrong",
-					"body": "failute: an unknown error occurred, try again",
-				})
-				return err, false, ""
-			}
-			c.JSON(http.StatusOK, gin.H{
-				"status": "refresh_is_true",
-				"body": newToken,
-			})
-			return nil, false, ""
-		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status": "refresh_is_wrong",
 				"body": "failure: token is invalid, try login",
 			})
-			return nil, false, ""
+			return err, false, ""
 		}
 		
+		newToken, err := jwtHandler.NewAccessToken(auth.AccessClaimCreator(parsedToken.Subject))
+		if err != nil { //if happen there's a problem with access claim creator or newaccesstoken the above checker should be valid if it got to here
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status": "refresh_is_wrong",
+				"body": "failue: an unknown error occurred, try again",
+			})
+			return err, false, ""
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"status": "refresh_is_true",
+			"body": newToken,
+		})
+		return nil, false, ""
+		
 	} else if tokenType == "access" {
+
 		parsedToken, err := jwtHandler.ParseAccessToken(token)
 		if err != nil {
-			common.CustomErrLog.Println(err)
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status": "access_is_wrong",
-				"body": "failure: token is invalid, try refresh",
+				"body": "failure: token is invalid or expire, try refresh",
 			})
 			return err, false, ""
 		}
@@ -225,12 +220,14 @@ func tokenRecognizer(c *gin.Context) (error, bool, string) { //this function ret
 		return nil, true, parsedToken.Username
 
 	} else {
+
 		common.CustomErrLog.Println("if it gots here it probably means that client changed manually tokentype")
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status": "login_is_wrong", //umm probably change this later
+			"status": "access_is_wrong", //umm probably change this later
 			"body": "failure: invalid request",
 		})
-		return nil, false, ""
+		return errors.New("tokenType of 'access' or 'refresh' was not found"), false, ""
+
 	}
 }
 

@@ -12,7 +12,8 @@ import (
 var CustomErrLog = log.New(os.Stderr, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile|log.LUTC)
 
 func ENVinit(){
-	os.Setenv("TOKEN_SECRET", 		"hello")
+	os.Setenv("TOKEN_SECRET_ACCESS", 		"access")
+	os.Setenv("TOKEN_SECRET_REFRESH", 		"refresh")
 	os.Setenv("ACCESS_EXP_MIN", 		"15")
 	os.Setenv("REFRESH_EXP_MIN", 		"2880")
 
