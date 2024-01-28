@@ -44,6 +44,8 @@ func main() {
 
 	longMsgGroup.DELETE("/delete", longDelete)
 
+	longMsgGroup.POST("/add", longAdd)
+
 	// Run the server on port 8080
 	err := router.Run(":8080")
 	if err != nil {
@@ -181,18 +183,16 @@ func loginUserHandler(c *gin.Context) {
 
 
 func longGetAll(c *gin.Context) { //longMsg/getall
-	
-	fmt.Println("reach xxxxxxxxxxxx")
+
 	haveAccess, respBody, err := tokenRecognizer(c)
-	fmt.Println(respBody)
-	fmt.Println("reach xxxxxxxxxxxxXXXXXXXXXXX")
+
 	if err != nil {	//force to login state
 		common.CustomErrLog.Println(err)  
 		return
 	}
 	if haveAccess {
 		all_messages := postgres.Get_all_messages(postgres.Client_connect(), respBody["username"].(string))
-		c.JSON(http.StatusUnauthorized, gin.H{		
+		c.JSON(http.StatusOK, gin.H{		
 			"status": "access_is_true",							
 			"body": all_messages,
 		})
@@ -210,7 +210,7 @@ func longGet(c *gin.Context) { //longMsg/get
 	}
 	if haveAccess {
 		message := postgres.Get_message(postgres.Client_connect(), respBody["username"].(string), respBody["id"].(string))
-		c.JSON(http.StatusUnauthorized, gin.H{		
+		c.JSON(http.StatusOK, gin.H{		
 			"status": "access_is_true",							
 			"body": message,
 		})
@@ -236,6 +236,26 @@ func longDelete(c *gin.Context) { //longMsg/delete
 	}
 }
 
+
+
+
+
+func longAdd(c *gin.Context) { //longMsg/add
+	
+	haveAccess, respBody, err := tokenRecognizer(c)
+	
+	if err != nil {	//force to login state
+		common.CustomErrLog.Println(err) 
+		return
+	}
+	if haveAccess {
+		result := postgres.Add_message(postgres.Client_connect(), respBody["username"].(string), respBody["message"].(string))
+		c.JSON(http.StatusOK, gin.H{	
+			"status": "access_is_true",										
+			"body": result,
+		})
+	}
+}
 
 
 
