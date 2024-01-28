@@ -192,7 +192,8 @@ func longGetAll(c *gin.Context) { //longMsg/getall
 	}
 	if haveAccess {
 		all_messages := postgres.Get_all_messages(postgres.Client_connect(), respBody["username"].(string))
-		c.JSON(http.StatusUnauthorized, gin.H{									
+		c.JSON(http.StatusUnauthorized, gin.H{		
+			"status": "access_is_true",							
 			"body": all_messages,
 		})
 	}
@@ -209,7 +210,8 @@ func longGet(c *gin.Context) { //longMsg/get
 	}
 	if haveAccess {
 		message := postgres.Get_message(postgres.Client_connect(), respBody["username"].(string), respBody["id"].(string))
-		c.JSON(http.StatusUnauthorized, gin.H{									
+		c.JSON(http.StatusUnauthorized, gin.H{		
+			"status": "access_is_true",							
 			"body": message,
 		})
 	}
@@ -227,7 +229,8 @@ func longDelete(c *gin.Context) { //longMsg/delete
 	}
 	if haveAccess {
 		result := postgres.Remove_message(postgres.Client_connect(), respBody["username"].(string), respBody["id"].(string))
-		c.JSON(http.StatusUnauthorized, gin.H{									
+		c.JSON(http.StatusOK, gin.H{	
+			"status": "access_is_true",										
 			"body": result,
 		})
 	}
@@ -290,10 +293,6 @@ func tokenRecognizer(c *gin.Context) (bool, map[string]interface{}, error) { //t
 		}
 
 		respBody["username"] = parsedToken.Username
-
-		c.JSON(http.StatusOK, gin.H{				
-			"status": "access_is_true",					
-		})
 
 		return true, respBody, nil
 
