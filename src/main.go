@@ -11,7 +11,7 @@ import (
 
 	//"main/postgres"
 	"encoding/json"
-
+	"errors"
 	//"io"
 	"net/http"
 
@@ -42,6 +42,8 @@ func main() {
 
 	longMsgGroup.GET("/get", longGet)
 
+	longMsgGroup.DELETE("/delete", longDelete)
+
 	// Run the server on port 8080
 	err := router.Run(":8080")
 	if err != nil {
@@ -50,16 +52,16 @@ func main() {
 }	
 
 
-func respBodyHandler(c *gin.Context) map[string]interface{} {
+func respBodyHandler(c *gin.Context) map[string]interface{}, error {
 
     clientResponse := make(map[string]interface{})
 
-    err := json.NewDecoder(c.Request.Body).Decode(&clientResponse)
-    if err != nil {
-        return nil
+    err := json.NewDecoder(c.Request.Body).Decode(&clientResponse) //the function to create something from body is being called anyway
+    if err != nil {													//but there's no body in normal getall request
+        return nil, errors.New("request probably have no body at all")
     }
-
-    return clientResponse
+	
+    return clientResponse, nil
 }
 
 func createUserHandler(c *gin.Context) { //user/create
@@ -162,8 +164,10 @@ func loginUserHandler(c *gin.Context) {
 
 func longGetAll(c *gin.Context) { //longMsg/getall
 	
+	fmt.Println("reach xxxxxxxxxxxx")
 	haveAccess, respBody, err := tokenRecognizer(c)
-	
+	fmt.Println(respBody)
+	fmt.Println("reach xxxxxxxxxxxxXXXXXXXXXXX")
 	if err != nil {	//force to login state
 		common.CustomErrLog.Println(err)  
 		return
@@ -192,6 +196,28 @@ func longGet(c *gin.Context) { //longMsg/get
 		})
 	}
 }
+
+
+
+func longDelete(c *gin.Context) { //longMsg/delete
+	
+	haveAccess, respBody, err := tokenRecognizer(c)
+	
+	if err != nil {	//force to login state
+		common.CustomErrLog.Println(err) 
+		return
+	}
+	if haveAccess {
+		result := postgres.Remove_message(postgres.Client_connect(), respBody["username"].(string), respBody["id"].(string))
+		c.JSON(http.StatusUnauthorized, gin.H{									
+			"body": result,
+		})
+	}
+}
+
+
+
+
 
 
 
@@ -238,10 +264,10 @@ func tokenRecognizer(c *gin.Context) (bool, map[string]interface{}, error) { //t
 		c.JSON(http.StatusOK, gin.H{									
 			"status": "access_is_true",
 		})
-
+		fmt.Println("reach1")
 		respBody := respBodyHandler(c) //mmm wonder if I should check if nil or not
 		respBody["username"] = parsedToken.Username
-		
+		fmt.Println(respBody)
 		return true, respBody, nil
 
 	} else {
