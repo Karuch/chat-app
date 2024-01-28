@@ -24,7 +24,6 @@ import (
 
 func main() {
 	common.ENVinit()
-
 	// Create a new Gin router
 	router := gin.Default()
 
