@@ -96,7 +96,7 @@ func Remove_message(db *sql.DB, username, id string) string {
   }
 
   command := "DELETE FROM MESSAGE WHERE sender = $1 AND ID = $2;;" //I don't handle this to use name need to return this later XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  send_db_command_to(db, command, id)
+  send_db_command_to(db, command, username, id)
   return fmt.Sprintf("message ID '%s' has been deleted successfully.", id)
   
 }
