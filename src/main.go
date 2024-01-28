@@ -66,9 +66,11 @@ func respBodyHandler(c *gin.Context) (map[string]interface{}, error) {
 
 func createUserHandler(c *gin.Context) { //user/create
 	map_of_user_data, err := respBodyHandler(c)
+	
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"body": "Error: invalid request",
+		c.JSON(http.StatusBadRequest, gin.H{				
+			"status": "force_to_default",					
+			"body": "error: access token is valid but invalid request - request must have body, even empty",
 		})
 		common.CustomErrLog.Println(err)
 		return
@@ -118,7 +120,16 @@ func createUserHandler(c *gin.Context) { //user/create
 }
 
 func loginUserHandler(c *gin.Context) {
-	map_of_user_data, _ := respBodyHandler(c)
+	map_of_user_data, err := respBodyHandler(c)
+	
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{				
+			"status": "force_to_default",					
+			"body": "error: access token is valid but invalid request - request must have body, even empty",
+		})
+		common.CustomErrLog.Println(err)
+		return
+	}
 
 	user, is_field_valid := (map_of_user_data)["User"].(string)
 	if !is_field_valid {
@@ -137,7 +148,7 @@ func loginUserHandler(c *gin.Context) {
 		return 
 	}
 	
-	err := auth.Validate_userpass(postgres.Client_connect(), user, pass)
+	err = auth.Validate_userpass(postgres.Client_connect(), user, pass)
 	if _, ok := err.(*common.CserverSideErr); ok {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"body": err.Error(),
