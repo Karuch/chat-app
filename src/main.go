@@ -40,6 +40,8 @@ func main() {
 
 	longMsgGroup.GET("/getall", longGetAll)
 
+	longMsgGroup.GET("/get", longGet)
+
 	// Run the server on port 8080
 	err := router.Run(":8080")
 	if err != nil {
@@ -160,15 +162,15 @@ func loginUserHandler(c *gin.Context) {
 
 func longGetAll(c *gin.Context) { //longMsg/getall
 	
-	haveAccess, username, err := tokenRecognizer(c)
+	haveAccess, respBody, err := tokenRecognizer(c)
 	
 	if err != nil {	//force to login state
 		common.CustomErrLog.Println(err)  
 		return
 	}
 	if haveAccess {
-		all_messages := postgres.Get_all_messages(postgres.Client_connect(), username)
-		c.JSON(http.StatusUnauthorized, gin.H{									//done auth success
+		all_messages := postgres.Get_all_messages(postgres.Client_connect(), respBody["username"].(string))
+		c.JSON(http.StatusUnauthorized, gin.H{									
 			"body": all_messages,
 		})
 	}
@@ -177,16 +179,16 @@ func longGetAll(c *gin.Context) { //longMsg/getall
 
 func longGet(c *gin.Context) { //longMsg/get
 	
-	haveAccess, username, err := tokenRecognizer(c)
+	haveAccess, respBody, err := tokenRecognizer(c)
 	
 	if err != nil {	//force to login state
 		common.CustomErrLog.Println(err) 
 		return
 	}
 	if haveAccess {
-		message := postgres.Get_message(postgres.Client_connect(), username)
-		c.JSON(http.StatusUnauthorized, gin.H{									//done auth success
-			"body": all_messages,
+		message := postgres.Get_message(postgres.Client_connect(), respBody["username"].(string), respBody["id"].(string))
+		c.JSON(http.StatusUnauthorized, gin.H{									
+			"body": message,
 		})
 	}
 }
@@ -195,7 +197,7 @@ func longGet(c *gin.Context) { //longMsg/get
 
 
 
-func tokenRecognizer(c *gin.Context) (bool, string, error) { //this function return true only if access works even if ref work it won't true
+func tokenRecognizer(c *gin.Context) (bool, map[string]interface{}, error) { //this function return true only if access works even if ref work it won't true
 	var token string = c.GetHeader("token")
 	var tokenType string = c.GetHeader("tokenType") 
 	if tokenType == "refresh" {
@@ -206,7 +208,7 @@ func tokenRecognizer(c *gin.Context) (bool, string, error) { //this function ret
 				"status": "refresh_is_wrong",
 				"body": "failure: token is invalid, try login",
 			})
-			return false, "", err
+			return false, nil, err
 		}
 		
 		newToken, err := jwtHandler.NewAccessToken(auth.AccessClaimCreator(parsedToken.Subject))
@@ -215,13 +217,13 @@ func tokenRecognizer(c *gin.Context) (bool, string, error) { //this function ret
 				"status": "refresh_is_wrong",
 				"body": "failue: an unknown error occurred, try again",
 			})
-			return false, "", err
+			return false, nil, err
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": "refresh_is_true",
 			"body": newToken,
 		})
-		return false, "", nil
+		return false, nil, nil
 		
 	} else if tokenType == "access" {
 
@@ -231,12 +233,16 @@ func tokenRecognizer(c *gin.Context) (bool, string, error) { //this function ret
 				"status": "access_is_wrong",
 				"body": "failure: token is invalid or expire, try refresh",
 			})
-			return false, "", err
+			return false, nil, err
 		}
 		c.JSON(http.StatusOK, gin.H{									
 			"status": "access_is_true",
 		})
-		return true, parsedToken.Username, nil
+
+		respBody := respBodyHandler(c) //mmm wonder if I should check if nil or not
+		respBody["username"] = parsedToken.Username
+		
+		return true, respBody, nil
 
 	} else {
 
@@ -245,7 +251,7 @@ func tokenRecognizer(c *gin.Context) (bool, string, error) { //this function ret
 			"status": "access_is_wrong", //umm probably change this later
 			"body": "failure: invalid request",
 		})
-		return false, "", errors.New("tokenType of 'access' or 'refresh' was not found")
+		return false, nil, errors.New("tokenType of 'access' or 'refresh' was not found")
 
 	}
 }

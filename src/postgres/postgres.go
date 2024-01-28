@@ -90,12 +90,12 @@ func Add_message(db *sql.DB, user string, message string) string {
   return fmt.Sprintf("message has been added: %v ] %v ] %v: %v", id, date, user, message)
 }
 
-func Remove_message(db *sql.DB, id string) string {
-  if Get_message(db, id) == "nothing was found X_X" { //check if message exist
+func Remove_message(db *sql.DB, username, id string) string {
+  if Get_message(db, username, id) == "nothing was found X_X" { //check if message exist
     return "nothing was found X_X"
   }
 
-  command := "DELETE FROM MESSAGE WHERE ID = $1;" //look at the spceial handling ''
+  command := "DELETE FROM MESSAGE WHERE ID = $1;" //I don't handle this to use name need to return this later XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   send_db_command_to(db, command, id)
   return fmt.Sprintf("message ID '%s' has been deleted successfully.", id)
   
@@ -106,9 +106,11 @@ func Get_all_messages(db *sql.DB, user string) []string {
   return send_db_query_to(db, command, user)
 }
 
-func Get_message(db *sql.DB, id string) string{
-  command := "SELECT * FROM MESSAGE WHERE ID = $1;" //look at the spceial handling ''
-  return send_db_query_to(db, command, id)[0]
+func Get_message(db *sql.DB, username string, id string) string{
+  command := "SELECT * FROM MESSAGE WHERE sender = $1 AND ID = $2;" //look at the spceial handling ''
+  return send_db_query_to(db, command, username, id)[0]
 }
+
+
 
 
