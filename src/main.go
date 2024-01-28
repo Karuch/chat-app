@@ -2,7 +2,7 @@ package main
 
 import (
 	//"encoding/json"
-	"errors"
+	
 	"fmt"
 	"main/auth"
 	"main/common"
@@ -52,20 +52,27 @@ func main() {
 }	
 
 
-func respBodyHandler(c *gin.Context) map[string]interface{}, error {
+func respBodyHandler(c *gin.Context) (map[string]interface{}, error) {
 
     clientResponse := make(map[string]interface{})
 
     err := json.NewDecoder(c.Request.Body).Decode(&clientResponse) //the function to create something from body is being called anyway
     if err != nil {													//but there's no body in normal getall request
-        return nil, errors.New("request probably have no body at all")
+        return nil, errors.New("request probably have no body at all, map is nil couldn't use json in map")
     }
 	
     return clientResponse, nil
 }
 
 func createUserHandler(c *gin.Context) { //user/create
-	map_of_user_data := respBodyHandler(c)
+	map_of_user_data, err := respBodyHandler(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"body": "Error: invalid request",
+		})
+		common.CustomErrLog.Println(err)
+		return
+	}
 
 	user, is_field_valid := (map_of_user_data)["User"].(string)
 	if !is_field_valid {
@@ -111,7 +118,7 @@ func createUserHandler(c *gin.Context) { //user/create
 }
 
 func loginUserHandler(c *gin.Context) {
-	map_of_user_data := respBodyHandler(c)
+	map_of_user_data, _ := respBodyHandler(c)
 
 	user, is_field_valid := (map_of_user_data)["User"].(string)
 	if !is_field_valid {
@@ -261,13 +268,22 @@ func tokenRecognizer(c *gin.Context) (bool, map[string]interface{}, error) { //t
 			})
 			return false, nil, err
 		}
-		c.JSON(http.StatusOK, gin.H{									
-			"status": "access_is_true",
-		})
-		fmt.Println("reach1")
-		respBody := respBodyHandler(c) //mmm wonder if I should check if nil or not
+
+		respBody, err := respBodyHandler(c) //mmm wonder if I should check if nil or not
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{				
+				"status": "access_is_true",					
+				"body": "error: access token is valid but invalid request - request must have body, even empty",
+			})
+			return false, nil, err
+		}
+
 		respBody["username"] = parsedToken.Username
-		fmt.Println(respBody)
+
+		c.JSON(http.StatusOK, gin.H{				
+			"status": "access_is_true",					
+		})
+
 		return true, respBody, nil
 
 	} else {
