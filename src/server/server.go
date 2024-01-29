@@ -19,7 +19,7 @@ func Start() {
 	// Create a route group for "/user"
 	userGroup := router.Group("/user")
 	longMsgGroup := router.Group("/longmsg")
-
+	shortMsgGroup := router.Group("/shortmsg")
 	// Define the "/user/create" endpoint
 	userGroup.POST("/create", CreateUserHandler)
 
@@ -33,6 +33,12 @@ func Start() {
 	longMsgGroup.DELETE("/delete", LongDelete)
 
 	longMsgGroup.POST("/add", LongAdd)
+
+
+
+	shortMsgGroup.GET("/get")
+
+
 
 	// Run the server on port 8080
 	err := router.Run(":8080")
