@@ -49,7 +49,7 @@ func Set(ctx context.Context, client *redis.Client, user string, message string)
 }
 
 
-func Getall(ctx context.Context, client *redis.Client, user string) []string {
+func Getall(ctx context.Context, client *redis.Client, username string) []string {
 	all_messages := []string{}
 	iter := client.Scan(ctx, 0, "*", 0).Iterator()
 	for iter.Next(ctx) {
@@ -58,8 +58,8 @@ func Getall(ctx context.Context, client *redis.Client, user string) []string {
 		if err != nil {
 			fmt.Println("Error:", err)
 		}
-		if result == user {
-			all_messages = append(all_messages, Get(ctx, client, iter.Val()))
+		if result == username {
+			all_messages = append(all_messages, Get(ctx, client, username, iter.Val()))
 		}
 	}
 	if err := iter.Err(); err != nil {
@@ -88,14 +88,14 @@ func Delete(ctx context.Context, client *redis.Client, key string) string {
 
 }
 
-func Get(ctx context.Context, client *redis.Client, key string) string {
+func Get(ctx context.Context, client *redis.Client, username string, key string) string {
 	exists_key_check, err_key_check := client.Exists(ctx, key).Result()
 	if err_key_check != nil {
 		fmt.Println("Error checking key existence:", err_key_check)
 		return "error"
 	}
 	if exists_key_check != 1 {
-		return fmt.Sprintf("nothing was found X_X")
+		return fmt.Sprintf("nothing was found X_X") //key does not exist
 	}
 	//actual function v
 	
@@ -103,6 +103,10 @@ func Get(ctx context.Context, client *redis.Client, key string) string {
 	values, err := client.HMGet(ctx, key, fields...).Result()
 	if err != nil {
 		fmt.Println("Error:", err)
+	}
+	if values[1] != username { //user does not permitted but ID was found 
+		fmt.Println("not permitted") 
+		return ""
 	}
 	return fmt.Sprintf(" %v ] %v ] %v : %v", key, values[0], values[1], values[2])
 }

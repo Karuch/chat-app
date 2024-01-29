@@ -6,12 +6,6 @@ import (
 
 
 
-
-
-
-
-
-
 func Start() {
 	// Create a new Gin router
 	router := gin.Default()
@@ -36,7 +30,9 @@ func Start() {
 
 
 
-	shortMsgGroup.GET("/get")
+	shortMsgGroup.GET("/get", ShortGet)
+
+	shortMsgGroup.POST("/add", ShortAdd)
 
 
 
