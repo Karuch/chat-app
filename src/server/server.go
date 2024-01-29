@@ -1,7 +1,6 @@
 package server
 
 import (
-	"main/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,7 +13,6 @@ import (
 
 
 func Start() {
-	common.ENVinit()
 	// Create a new Gin router
 	router := gin.Default()
 
