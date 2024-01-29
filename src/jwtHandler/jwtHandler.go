@@ -31,7 +31,6 @@ func ParseAccessToken(accessToken string) (*UserClaims, error) {
 	})
 
 	if err != nil {
-        fmt.Println("reach erorrrrrr rduddeeeeee")
 		return nil, fmt.Errorf("Error parsing access token: %v", err)
 	}
 
@@ -47,7 +46,6 @@ func ParseRefreshToken(refreshToken string) (*jwt.StandardClaims, error) {
         return nil, err
     }
 
-    fmt.Println("reachhhhh")
     return parsedRefreshToken.Claims.(*jwt.StandardClaims), nil
 }
 
