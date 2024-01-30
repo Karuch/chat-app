@@ -45,10 +45,19 @@ func tokenRecognizer(c *gin.Context) (bool, map[string]interface{}, error) { //t
 			})
 			return false, nil, err
 		}
+
+		newHalfLifeRefreshToken, err := auth.Check_half_life_refresh_need_new(*parsedToken)
+		if err != nil {
+			common.CustomErrLog.Println(err)
+			//I don't want it to return errors unless panic, just write a log
+		}
+
 		c.JSON(http.StatusOK, gin.H{
 			"status": "refresh_is_true",
 			"body": newToken,
+			"newRefreshHalfLife": newHalfLifeRefreshToken,
 		})
+
 		return false, nil, nil
 		
 	} else if tokenType == "access" {

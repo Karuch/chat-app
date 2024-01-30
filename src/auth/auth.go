@@ -90,30 +90,24 @@ func Check_refresh_token(refreshtoken string){
 	return
 }*/
 
-/*
-func Check_half_life_refresh_need_new(refreshtoken string) (string, error) {
-	parsedRefreshToken, err := jwtHandler.ParseRefreshToken(refreshtoken)
-	if err != nil {
-		return "", err
-	}
+
+func Check_half_life_refresh_need_new(parsedRefreshToken jwt.StandardClaims) (string, error) {
+
 	expiresAtTime := time.Unix(parsedRefreshToken.ExpiresAt, 0)
 	secondsDifference := time.Until(expiresAtTime).Seconds()
 	if float64(common.Refresh_exp_min*60/2) < secondsDifference/2 {
-		parsedToken, err := jwtHandler.ParseRefreshToken(refreshtoken)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(parsedToken.Subject)
-	
-		newRefreshToken, err := jwtHandler.NewRefreshToken(auth.Refresh_claim_creator(parsedToken.Subject))
+
+		newRefreshToken, err := jwtHandler.NewRefreshToken(Refresh_claim_creator(parsedRefreshToken.Subject))
 		if err != nil { //if happen there's a problem with access claim creator or newaccesstoken the above checker should be valid if it got to here
 			fmt.Println(err)
 		}
 		//generate new refresh send status to user half_time_refresh
 		return newRefreshToken, nil
 	}
+	return "", fmt.Errorf("token of %s hasn't reached half the time yet", parsedRefreshToken.Subject)
+
 }
-*/
+
 
 func Refresh_claim_creator(user string) jwt.StandardClaims {
 	var RefreshClaims = jwt.StandardClaims{
