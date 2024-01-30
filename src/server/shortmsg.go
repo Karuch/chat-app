@@ -43,3 +43,19 @@ func ShortAdd(c *gin.Context) {
 		})
 	}
 }
+
+func ShortDelete(c *gin.Context) {
+	haveAccess, respBody, err := tokenRecognizer(c)
+
+	if err != nil {	//force to login state
+		common.CustomErrLog.Println(err) 
+		return
+	}
+	if haveAccess {
+		result := redis.Delete(c, redis.Client_connect(), respBody["username"].(string), respBody["id"].(string))
+		c.JSON(http.StatusOK, gin.H{		
+			"status": "access_is_true",							
+			"body": result,
+		})
+	}
+}

@@ -32,7 +32,7 @@ func tokenRecognizer(c *gin.Context) (bool, map[string]interface{}, error) { //t
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status": "refresh_is_wrong",
-				"body": "failure: token is invalid, try login",
+				"body": "failure: token is invalid or expire, try login",
 			})
 			return false, nil, err
 		}

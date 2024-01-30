@@ -34,7 +34,7 @@ func Start() {
 
 	shortMsgGroup.POST("/add", ShortAdd)
 
-
+	shortMsgGroup.DELETE("/delete", ShortDelete)
 
 	// Run the server on port 8080
 	err := router.Run(":8080")

@@ -25,12 +25,12 @@ func Client_connect() *redis.Client { //wonder if that's a good idea it means th
     DB:		  common.Convert_to_int(os.Getenv("REDIS_DB")),  // use default DB
   })
   
-  pong, err := client.Ping(Ctx).Result()
+  _, err := client.Ping(Ctx).Result()
   if err != nil {
 	  common.CustomErrLog.Println(err)
 	  //panic(err) will cause panic if postgres is down which is not a behavior I exacly want but fatal error
   }
-  fmt.Println(pong)
+
   return client
 }
 
@@ -76,18 +76,26 @@ func Getall(ctx context.Context, client *redis.Client, username string) []string
 }
 
 
-func Delete(ctx context.Context, client *redis.Client, key string) string {
+func Delete(ctx context.Context, client *redis.Client, username string, key string) string {
 	exists_key_check, err_key_check := client.Exists(ctx, key).Result()
 	if err_key_check != nil {
 		fmt.Println("Error checking key existence:", err_key_check)
 		return "error"
 	}
 	if exists_key_check != 1 {
-		return fmt.Sprintf("nothing was found X_X")
+		return "nothing was found X_X"
 	}
 	//actual function v
+	values, err := client.HMGet(ctx, key, "user").Result()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	if values[1] != username { //user does not permitted but ID was found 
+		fmt.Println("not permitted") 
+		return fmt.Sprintf("not permitted as %s", username)
+	}
 
-	_, err := client.Del(ctx, key).Result()
+	_, err = client.Del(ctx, key).Result()
 	if err != nil {
 		return fmt.Sprintf("%s", err)
 	}
@@ -102,7 +110,7 @@ func Get(ctx context.Context, client *redis.Client, username string, key string)
 		return "error"
 	}
 	if exists_key_check != 1 {
-		return fmt.Sprintf("nothing was found X_X") //key does not exist
+		return "nothing was found X_X" //key does not exist
 	}
 	//actual function v
 	
@@ -113,7 +121,7 @@ func Get(ctx context.Context, client *redis.Client, username string, key string)
 	}
 	if values[1] != username { //user does not permitted but ID was found 
 		fmt.Println("not permitted") 
-		return ""
+		return fmt.Sprintf("not permitted as %s", username)
 	}
 	return fmt.Sprintf(" %v ] %v ] %v : %v", key, values[0], values[1], values[2])
 }
