@@ -21,18 +21,25 @@ func Client_connect() *sql.DB {
   psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
   "password=%s dbname=%s sslmode=disable",
   os.Getenv("POSTGRES_IP"), common.Convert_to_int(os.Getenv("POSTGRES_PORT")), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"))
-  db, err := sql.Open("postgres", psqlInfo)
-  if err != nil {
+  
+  db, err := sql.Open("postgres", psqlInfo) //just intiallize db for sql conntections or something, dosen't check if DB is up
+  if err != nil {                           //so will not return err if DB is down. if DB can't get SQL connection it's fatal error
+    common.CustomErrLog.Println(err)                     
     panic(err)
   }
-  send_db_command_to(db, "CREATE TABLE IF NOT EXISTS MESSAGE (id VARCHAR(50), message VARCHAR(255), sender VARCHAR(50), date VARCHAR(50))")
-  send_db_command_to(db, "CREATE TABLE IF NOT EXISTS USERS (id SERIAL PRIMARY KEY, username VARCHAR(50) UNIQUE CHECK (length(username) >= 3), hash BYTEA, salt BYTEA)")
-  //create table if does not exist ^
+
   err = db.Ping()
   if err != nil {
-    panic(err)
-  }
+    common.CustomErrLog.Println(err)
+    //panic(err) will cause panic if postgres is down which is not a behavior I exacly want but fatal error
+  } else {
+
+    send_db_command_to(db, "CREATE TABLE IF NOT EXISTS MESSAGE (id VARCHAR(50), message VARCHAR(255), sender VARCHAR(50), date VARCHAR(50))")
+    send_db_command_to(db, "CREATE TABLE IF NOT EXISTS USERS (id SERIAL PRIMARY KEY, username VARCHAR(50) UNIQUE CHECK (length(username) >= 3), hash BYTEA, salt BYTEA)")
+    //create table if does not exist ^
+
   fmt.Println("Successfully connected!")
+  }
   return db
 }
 

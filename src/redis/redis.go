@@ -24,6 +24,13 @@ func Client_connect() *redis.Client { //wonder if that's a good idea it means th
     Password: os.Getenv("REDIS_PASSWORD"), // no password set
     DB:		  common.Convert_to_int(os.Getenv("REDIS_DB")),  // use default DB
   })
+  
+  pong, err := client.Ping(Ctx).Result()
+  if err != nil {
+	  common.CustomErrLog.Println(err)
+	  //panic(err) will cause panic if postgres is down which is not a behavior I exacly want but fatal error
+  }
+  fmt.Println(pong)
   return client
 }
 

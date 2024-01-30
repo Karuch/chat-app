@@ -39,7 +39,6 @@ var (
 func EnvVarDeclare(){
 	*&Refresh_exp_min = Convert_to_int(os.Getenv("REFRESH_EXP_MIN"))
 	*&Access_exp_min = Convert_to_int(os.Getenv("ACCESS_EXP_MIN"))
-	fmt.Println("init", Refresh_exp_min, Access_exp_min)
 }
 
 func Current_date_for_message() string {
