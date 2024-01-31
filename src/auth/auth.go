@@ -43,11 +43,11 @@ func Create_user(db *sql.DB, username string, password string) (string, error) {
 	return fmt.Sprintf("'%s' Registered successfully.", username), nil
 }
 
-func Validate_userpass(db *sql.DB, username string, password string) (error) { //there's a problem with the way this
+func Validate_userpass(db *sql.DB, username string, password string) (bool, error) { //there's a problem with the way this
 	rows, err := db.Query("SELECT hash, salt FROM USERS WHERE username = $1;", username)	//function is built can't
 	if err != nil {																//return correct status
 		common.CustomErrLog.Println(err)
-		return common.ServerSideCustom_Error("an unknown error occured")
+		return false, errors.New("an unknown error occured")
 	}
 	var db_hash []byte;
 	var db_salt []byte;
@@ -55,18 +55,18 @@ func Validate_userpass(db *sql.DB, username string, password string) (error) { /
 		err := rows.Scan(&db_hash, &db_salt)
 		if err != nil {
 			common.CustomErrLog.Println(err)
-			return common.ServerSideCustom_Error("an unknown error occured")
+			return false, errors.New("an unknown error occured")
 		}
 	}
 	_, user_is_valid := HnSCompare(ArgonObject, db_hash, db_salt, []byte(password))
 	
 	if user_is_valid {
+		return true, nil
 		//send user refresh with status login_is_true
 	} else {
 		//send user with status login_is_wrong
-		return errors.New("username or password invalid")
+		return false, nil
 	}
-	return nil
 }
 
 /*func Check_access_token(accesstoken string){

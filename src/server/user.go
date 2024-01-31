@@ -95,19 +95,22 @@ func LoginUserHandler(c *gin.Context) {
 		return 
 	}
 	
-	err = auth.Validate_userpass(postgres.Client_connect(), user, pass)
-	if _, ok := err.(*common.CserverSideErr); ok {
-		c.JSON(http.StatusInternalServerError, gin.H{
+	isUserValid, err := auth.Validate_userpass(postgres.Client_connect(), user, pass) //need to return in specific error type
+	if err != nil {											//in one case return statusinternal
+		c.JSON(http.StatusInternalServerError, gin.H{					//in other return conflict
 			"body": err.Error(),
 		})
-		return 
-	} else if err != nil {
-		c.JSON(http.StatusConflict, gin.H{
+		return
+	} 
+
+	if !isUserValid {
+		fmt.Println("wrong username or password with", user, "from", c.ClientIP())
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"status": "login_is_wrong",
-			"body": err.Error(),
+			"body": "username or password invalid",
 		})
-		return 
-	}
+		return
+	} 
 	
 	token, err := jwtHandler.NewRefreshToken(auth.Refresh_claim_creator(user))
 	if err != nil {
@@ -118,9 +121,11 @@ func LoginUserHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status": "login_is_true",
-		"body": fmt.Sprintf("You are successfully logged in as '%s'", user),
-		"token": token,
-	})
+	if isUserValid {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "login_is_true",
+			"body": fmt.Sprintf("You are successfully logged in as '%s'", user),
+			"token": token,
+		})
+	}
 }

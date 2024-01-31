@@ -65,6 +65,7 @@ func Convert_to_int(str string) int {
 	return val
 }
 
+/*
 // CustomError is a custom type that implements the error interface.
 type CserverSideErr struct {	//those are errors client should not be aware, the msg will be returned as unknown error
     Message string				//the status will be 500 server fault
@@ -79,3 +80,4 @@ func (e *CserverSideErr) Error() string {
 func ServerSideCustom_Error(str string) error {
     return &CserverSideErr{Message: str}
 }
+*/
