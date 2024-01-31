@@ -18,7 +18,15 @@ func LongGetAll(c *gin.Context) { //longMsg/getall
 		return
 	}
 	if haveAccess {
-		all_messages := postgres.Get_all_messages(postgres.Client_connect(), respBody["username"].(string))
+		all_messages, err := postgres.Get_all_messages(postgres.Client_connect(), respBody["username"].(string))
+		if err != nil {
+			common.CustomErrLog.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{	
+				"status": "access_is_true",										
+				"body": all_messages,
+			})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{		
 			"status": "access_is_true",							
 			"body": all_messages,
@@ -36,7 +44,15 @@ func LongGet(c *gin.Context) { //longMsg/get
 		return
 	}
 	if haveAccess {
-		message := postgres.Get_message(postgres.Client_connect(), respBody["username"].(string), respBody["id"].(string))
+		message, _, err := postgres.Get_message(postgres.Client_connect(), respBody["username"].(string), respBody["id"].(string))
+		if err != nil {
+			common.CustomErrLog.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{	
+				"status": "access_is_true",										
+				"body": message,
+			})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{		
 			"status": "access_is_true",							
 			"body": message,
@@ -55,7 +71,15 @@ func LongDelete(c *gin.Context) { //longMsg/delete
 		return
 	}
 	if haveAccess {
-		result := postgres.Remove_message(postgres.Client_connect(), respBody["username"].(string), respBody["id"].(string))
+		result, err := postgres.Remove_message(postgres.Client_connect(), respBody["username"].(string), respBody["id"].(string))
+		if err != nil {
+			common.CustomErrLog.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{	
+				"status": "access_is_true",										
+				"body": result,
+			})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{	
 			"status": "access_is_true",										
 			"body": result,
@@ -76,7 +100,15 @@ func LongAdd(c *gin.Context) { //longMsg/add
 		return
 	}
 	if haveAccess {
-		result := postgres.Add_message(postgres.Client_connect(), respBody["username"].(string), respBody["message"].(string))
+		result, err := postgres.Add_message(postgres.Client_connect(), respBody["username"].(string), respBody["message"].(string))
+		if err != nil {
+			common.CustomErrLog.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{	
+				"status": "access_is_true",										
+				"body": err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{	
 			"status": "access_is_true",										
 			"body": result,
