@@ -2,9 +2,9 @@ package main
 
 import (
 	"main/common"
-	"main/postgres"
-	"main/redis"
 	"main/server"
+	"fmt"
+	"os"
 )
 
 
@@ -13,8 +13,7 @@ import (
 
 func main(){
 	common.ENVinit()
-	redis.Client_connect()
-	postgres.Client_connect()
+	fmt.Println(os.Getenv("TOKEN_SECRET_ACCESS"))
 	server.Start()
 }
 

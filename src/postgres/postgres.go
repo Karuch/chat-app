@@ -47,7 +47,7 @@ func send_db_command_to(db *sql.DB, command string, args ...interface{}) error {
 	_, err := db.Exec(command, args...)
 	if err != nil {
 		common.CustomErrLog.Println(err)
-    return err
+    return common.ErrInternalFailure
 	}
   return nil
 }
@@ -60,33 +60,28 @@ var (
 )
 
 func send_db_query_to(db *sql.DB, command string, args ...interface{}) ([]string, error) {
-  values := []string{}
   rows, err := db.Query(command, args...)
 	if err != nil {
     common.CustomErrLog.Println(err)
-    values = append(values, "Unknown error")
-		return values, err
+		return []string{""}, common.ErrInternalFailure
 	}
 	defer rows.Close()
 
+  values := []string{}
 	for rows.Next() {
 		err := rows.Scan(&id, &message, &user, &date)
 		if err != nil {
       common.CustomErrLog.Println(err)
-      values = append(values, "Unknown error")
-      return values, err
+      return []string{""}, common.ErrInternalFailure
 		}
     values = append(values, fmt.Sprintf("%v ] %v ] %v : %v", id, date, user, message))
 	}
 
 	if err := rows.Err(); err != nil {
     common.CustomErrLog.Println(err)
-    values = append(values, "Unknown error")
-		return values, err
+		return []string{""}, common.ErrInternalFailure
 	}
-  //if len(values) <= 0 { -> return empty []string may cause nil behavior need to check this
-  //  values = append(values, "nothing was found X_X")
-  //}
+
   return values, nil
 }
 
@@ -98,25 +93,25 @@ func Add_message(db *sql.DB, user string, message string) (string, error) {
   err := send_db_command_to(db, command, message, user)
   if err != nil {
     common.CustomErrLog.Println(err)
-    return "Unknown error", err
+    return "", err
   }
   return fmt.Sprintf("message has been added: %v ] %v ] %v: %v", id, date, user, message), nil
 }
 
 func Remove_message(db *sql.DB, username, id string) (string, error) {
   
-  _, nothingFound, err := Get_message(db, username, id) //check if message exist
+  _, err := Get_message(db, username, id) //check if message exist
   if err != nil {
     common.CustomErrLog.Println(err)
-    return "Unknown error", err
-  }
-  
-  if nothingFound {
-    return "nothing was found X_X", nil
+    return "", err
   }
 
-  command := "DELETE FROM MESSAGE WHERE sender = $1 AND ID = $2;;" //I don't handle this to use name need to return this later XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  send_db_command_to(db, command, username, id)
+  command := "DELETE FROM MESSAGE WHERE sender = $1 AND ID = $2;" //I don't handle this to use name need to return this later XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  err = send_db_command_to(db, command, username, id)
+  if err != nil {
+    common.CustomErrLog.Println(err)
+    return "", err
+  }
   return fmt.Sprintf("message ID '%s' has been deleted successfully.", id), nil
   
 }
@@ -130,25 +125,25 @@ func Get_all_messages(db *sql.DB, username string) ([]string, error) {
   }
 
   if len(result) <= 0 {
-    return []string{"nothing was found X_X"}, nil
+    return []string{""}, fmt.Errorf("%s: nothing was found using this ID", common.ErrNotFound)
   }
 
   return result, nil
 }
 
-func Get_message(db *sql.DB, username string, id string) ([]string, bool, error) {
+func Get_message(db *sql.DB, username string, id string) ([]string, error) {
   command := "SELECT * FROM MESSAGE WHERE sender = $1 AND ID = $2;" //look at the spceial handling ''
   result, err := send_db_query_to(db, command, username, id)
   if err != nil {
     common.CustomErrLog.Println(err)
-    return []string{"unknown error"}, false ,err
+    return []string{""}, err
   }
   
   if len(result) <= 0 {
-    return []string{"nothing was found X_X"}, true, nil
+    return []string{""}, fmt.Errorf("%s: nothing was found using this ID", common.ErrNotFound)
   }
 
-  return result, false, nil
+  return result, nil
 }
 
 

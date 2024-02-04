@@ -1,12 +1,13 @@
 package common
 
 import (
-  "time"
-  "strconv"
-  "os"
-  "github.com/google/uuid"
-  "fmt"
-  "log"
+	
+	"log"
+	"os"
+	"strconv"
+	"time"
+	"fmt"
+	"github.com/google/uuid"
 )
 
 var CustomErrLog = log.New(os.Stderr, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile|log.LUTC)
@@ -16,7 +17,6 @@ func ENVinit(){
 	os.Setenv("TOKEN_SECRET_REFRESH", 		"refresh")
 	os.Setenv("ACCESS_EXP_MIN", 		"15")
 	os.Setenv("REFRESH_EXP_MIN", 		"2880")
-
 	os.Setenv("REDIS_IP", 		"172.17.0.2")
 	os.Setenv("REDIS_PORT", 	"6379")
 	os.Setenv("REDIS_PASSWORD", "1598")
@@ -27,8 +27,9 @@ func ENVinit(){
 	os.Setenv("POSTGRES_USER",		"postgres")
 	os.Setenv("POSTGRES_PASSWORD",	"1598")
 	os.Setenv("POSTGRES_DB",		"postgres")
-
+	fmt.Println("here", os.Getenv("POSTGRES_PORT"))
 	EnvVarDeclare()
+
 }
 
 var (
@@ -58,7 +59,8 @@ func Random_uuid() string{
 func Convert_to_int(str string) int {
 	val, err := strconv.Atoi(str);
 	if err != nil {
-		fmt.Println("can't convert to int", err)
+		CustomErrLog.Println(err)
+		//panic(err)
 	} else {
 		return val
 	}
