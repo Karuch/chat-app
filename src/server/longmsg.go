@@ -7,9 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
-var dbConnect = postgres.Client_connect()
-
 func LongGetAll(c *gin.Context) { //longMsg/getall
 
 	haveAccess, respBody, err := tokenRecognizer(c)
@@ -19,7 +16,7 @@ func LongGetAll(c *gin.Context) { //longMsg/getall
 		return
 	}
 	if haveAccess {
-		all_messages, err := postgres.Get_all_messages(dbConnect, respBody["username"].(string))
+		all_messages, err := postgres.Get_all_messages(postgres.DBconnect, respBody["username"].(string))
 		if err != nil {
 			common.CustomErrLog.Println(err)
 			common.ErrStatusChecker(err, c)
@@ -42,7 +39,7 @@ func LongGet(c *gin.Context) { //longMsg/get
 		return
 	}
 	if haveAccess {
-		message, err := postgres.Get_message(dbConnect, respBody["username"].(string), respBody["id"].(string))
+		message, err := postgres.Get_message(postgres.DBconnect, respBody["username"].(string), respBody["id"].(string))
 		if err != nil {
 			common.CustomErrLog.Println(err)
 			common.ErrStatusChecker(err, c)
@@ -66,7 +63,7 @@ func LongDelete(c *gin.Context) { //longMsg/delete
 		return
 	}
 	if haveAccess {
-		result, err := postgres.Remove_message(dbConnect, respBody["username"].(string), respBody["id"].(string))
+		result, err := postgres.Remove_message(postgres.DBconnect, respBody["username"].(string), respBody["id"].(string))
 		if err != nil {
 			common.CustomErrLog.Println(err)
 			common.ErrStatusChecker(err, c)
@@ -92,7 +89,7 @@ func LongAdd(c *gin.Context) { //longMsg/add
 		return
 	}
 	if haveAccess {
-		result, err := postgres.Add_message(dbConnect, respBody["username"].(string), respBody["message"].(string))
+		result, err := postgres.Add_message(postgres.DBconnect, respBody["username"].(string), respBody["message"].(string))
 		if err != nil {
 			common.CustomErrLog.Println(err)
 			common.ErrStatusChecker(err, c)
