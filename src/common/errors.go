@@ -2,7 +2,9 @@ package common
 
 import (
 	"errors"
+	
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,22 +15,24 @@ var (
 )
 
 func ErrStatusChecker(err error, c *gin.Context) error {
-	switch err {
-    case ErrNotFound:
+	if errors.Is(err, ErrNotFound) {
 		c.JSON(http.StatusOK, gin.H{	
 			"status": "access_is_true",										
 			"body": err.Error(),
 		})
-    case ErrInternalFailure:
+	}
+	if errors.Is(err, ErrInternalFailure) {
 		c.JSON(http.StatusInternalServerError, gin.H{	
 			"status": "access_is_true",										
 			"body": ErrInternalFailure.Error(),
 		})
-    case ErrBadRequest:
+	}
+	if errors.Is(err, ErrBadRequest) {
 		c.JSON(http.StatusBadRequest, gin.H{	
 			"status": "access_is_true",										
 			"body": err.Error(),
 		})
-    }
+	}
+	
 	return nil
 }

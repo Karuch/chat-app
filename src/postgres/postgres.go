@@ -130,7 +130,7 @@ func Get_all_messages(db *sql.DB, username string) ([]string, error) {
 	}
 
 	if len(result) <= 0 {
-		return []string{""}, fmt.Errorf("%s: nothing was found using this ID", common.ErrNotFound)
+		return []string{""}, fmt.Errorf("%w: nothing was found using this ID", common.ErrNotFound)
 	}
 
 	return result, nil
@@ -145,7 +145,7 @@ func Get_message(db *sql.DB, username string, id string) ([]string, error) {
 	}
 
 	if len(result) <= 0 {
-		return []string{""}, fmt.Errorf("%s: nothing was found using this ID", common.ErrNotFound)
+		return []string{""}, fmt.Errorf("%w: nothing was found using this ID", common.ErrNotFound)
 	}
 
 	return result, nil
