@@ -90,7 +90,8 @@ func Delete(ctx context.Context, client *redis.Client, username string, key stri
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-	if values[1] != username { //user does not permitted but ID was found 
+	fmt.Println(values...)
+	if values[0] != username { //user does not permitted but ID was found 
 		fmt.Println("not permitted") 
 		return fmt.Sprintf("not permitted as %s", username)
 	}
