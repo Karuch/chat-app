@@ -18,7 +18,7 @@ func ShortGet(c *gin.Context) {
 		return
 	}
 	if haveAccess {
-		message := redis.Get(c, redis.Client_connect(), respBody["username"].(string), respBody["id"].(string))
+		message := redis.Get(c, redis.DBconnect, respBody["username"].(string), respBody["id"].(string))
 		c.JSON(http.StatusOK, gin.H{		
 			"status": "access_is_true",							
 			"body": message,
@@ -36,7 +36,7 @@ func ShortAdd(c *gin.Context) {
 		return
 	}
 	if haveAccess {
-		result := redis.Set(c, redis.Client_connect(), respBody["username"].(string), respBody["message"].(string))
+		result := redis.Set(c, redis.DBconnect, respBody["username"].(string), respBody["message"].(string))
 		c.JSON(http.StatusOK, gin.H{		
 			"status": "access_is_true",							
 			"body": result,
@@ -52,7 +52,7 @@ func ShortDelete(c *gin.Context) {
 		return
 	}
 	if haveAccess {
-		result := redis.Delete(c, redis.Client_connect(), respBody["username"].(string), respBody["id"].(string))
+		result := redis.Delete(c, redis.DBconnect, respBody["username"].(string), respBody["id"].(string))
 		c.JSON(http.StatusOK, gin.H{		
 			"status": "access_is_true",							
 			"body": result,

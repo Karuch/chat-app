@@ -15,17 +15,21 @@ import (
   fmt.Println(redis.Get(redis.Ctx, redis.Connect_to_db(), "cdbe806a-9357-47cf-a6bf-a423611eb710")) */
 
 
+var DBconnect *redis.Client
 
-var Ctx context.Context = context.Background()
+func SetupRedisConnection() {
+  DBconnect = Client_connect()
+}
 
 func Client_connect() *redis.Client { //wonder if that's a good idea it means that the connection will disconnect each time
+  var ctx context.Context = context.Background()
   client := redis.NewClient(&redis.Options{ //calling function I think
     Addr:	  fmt.Sprintf("%s:%s", os.Getenv("REDIS_IP"), os.Getenv("REDIS_PORT")),
     Password: os.Getenv("REDIS_PASSWORD"), // no password set
     DB:		  common.Convert_to_int(os.Getenv("REDIS_DB")),  // use default DB
   })
   
-  _, err := client.Ping(Ctx).Result()
+  _, err := client.Ping(ctx).Result()
   if err != nil {
 	  common.CustomErrLog.Println(err)
 	  //panic(err) will cause panic if postgres is down which is not a behavior I exacly want but fatal error
