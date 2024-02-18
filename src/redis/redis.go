@@ -38,7 +38,7 @@ func Client_connect() *redis.Client { //wonder if that's a good idea it means th
   return client
 }
 
-func Set(ctx context.Context, client *redis.Client, user string, message string) string {
+func Set(ctx context.Context, client *redis.Client, user string, message string) (string, error) {
 	// Specify the key and fields
 	var id string = common.Random_uuid()
 	fields := map[string]interface{}{
@@ -46,17 +46,17 @@ func Set(ctx context.Context, client *redis.Client, user string, message string)
 		"user":  user,
 		"message": message,
 	}
-
+	
 	// Use the HSet method to set the values
 	_, err := client.HSet(ctx, id, fields).Result()
 	if err != nil {
-		fmt.Println("Error:", err)
-		return "error"
+		common.CustomErrLog.Println(err)
+		return "", common.ErrInternalFailure
 	}
 
 	// Print the result (1 if a new field was created, 0 if field already existed and was updated)
 	
-	return fmt.Sprintf("message has been added: %v ] %v ] %v : %v\n", id, fields["date"], fields["user"], fields["message"])
+	return fmt.Sprintf("message has been added: %v ] %v ] %v : %v\n", id, fields["date"], fields["user"], fields["message"]), nil
 }
 
 
