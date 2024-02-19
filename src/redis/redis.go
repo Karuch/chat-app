@@ -46,7 +46,7 @@ func Set(ctx context.Context, client *redis.Client, user string, message string)
 		"user":  user,
 		"message": message,
 	}
-	
+	fmt.Println(fields)
 	// Use the HSet method to set the values
 	_, err := client.HSet(ctx, id, fields).Result()
 	if err != nil {
