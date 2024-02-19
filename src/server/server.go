@@ -32,6 +32,8 @@ func Start() {
 
 	shortMsgGroup.GET("/get", ShortGet)
 
+	shortMsgGroup.GET("/getall", ShortGetall)
+
 	shortMsgGroup.POST("/add", ShortAdd)
 
 	shortMsgGroup.DELETE("/delete", ShortDelete)

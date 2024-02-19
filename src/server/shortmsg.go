@@ -94,6 +94,27 @@ func ShortDelete(c *gin.Context) {
 	}
 }
 
+func ShortGetall(c *gin.Context) {
+	haveAccess, respBody, err := tokenRecognizer(c)
+
+	if err != nil { //force to login state
+		common.CustomErrLog.Println(err)
+		return
+	}
+
+	username, err := respBodyIsFatalField(c, respBody, "username")
+	if err != nil {
+		return
+	}
+
+	if haveAccess {
+		message := redis.Getall(c, redis.DBconnect, username)
+		c.JSON(http.StatusOK, gin.H{
+			"status": "access_is_true",
+			"body":   message,
+		})
+	}
+}
 
 
 
