@@ -15,8 +15,14 @@ func LongGetAll(c *gin.Context) { //longMsg/getall
 		common.CustomErrLog.Println(err)  
 		return
 	}
+
+	username, err := common.RespBodyIsFatalField(c, respBody, "username")
+	if err != nil {
+		return
+	}
+
 	if haveAccess {
-		all_messages, err := postgres.Get_all_messages(postgres.DBconnect, respBody["username"].(string))
+		all_messages, err := postgres.Get_all_messages(postgres.DBconnect, username)
 		if err != nil {
 			common.CustomErrLog.Println(err)
 			common.ErrStatusChecker(err, c)
@@ -38,8 +44,19 @@ func LongGet(c *gin.Context) { //longMsg/get
 		common.CustomErrLog.Println(err) 
 		return
 	}
+
+	username, err := common.RespBodyIsFatalField(c, respBody, "username")
+	if err != nil {
+		return
+	}
+
+	id, err := common.RespBodyIsWrongField(c, respBody, "id")
+	if err != nil {
+		return
+	}
+
 	if haveAccess {
-		message, err := postgres.Get_message(postgres.DBconnect, respBody["username"].(string), respBody["id"].(string))
+		message, err := postgres.Get_message(postgres.DBconnect, username, id)
 		if err != nil {
 			common.CustomErrLog.Println(err)
 			common.ErrStatusChecker(err, c)
@@ -62,8 +79,19 @@ func LongDelete(c *gin.Context) { //longMsg/delete
 		common.CustomErrLog.Println(err) 
 		return
 	}
+
+	username, err := common.RespBodyIsFatalField(c, respBody, "username")
+	if err != nil {
+		return
+	}
+
+	id, err := common.RespBodyIsWrongField(c, respBody, "id")
+	if err != nil {
+		return
+	}
+
 	if haveAccess {
-		result, err := postgres.Remove_message(postgres.DBconnect, respBody["username"].(string), respBody["id"].(string))
+		result, err := postgres.Remove_message(postgres.DBconnect, username, id)
 		if err != nil {
 			common.CustomErrLog.Println(err)
 			common.ErrStatusChecker(err, c)
@@ -88,8 +116,19 @@ func LongAdd(c *gin.Context) { //longMsg/add
 		common.CustomErrLog.Println(err) 
 		return
 	}
+
+	username, err := common.RespBodyIsFatalField(c, respBody, "username")
+	if err != nil {
+		return
+	}
+
+	message, err := common.RespBodyIsWrongField(c, respBody, "message")
+	if err != nil {
+		return
+	}
+
 	if haveAccess {
-		result, err := postgres.Add_message(postgres.DBconnect, respBody["username"].(string), respBody["message"].(string))
+		result, err := postgres.Add_message(postgres.DBconnect, username, message)
 		if err != nil {
 			common.CustomErrLog.Println(err)
 			common.ErrStatusChecker(err, c)
