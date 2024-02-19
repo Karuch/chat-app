@@ -16,12 +16,12 @@ func ShortGet(c *gin.Context) {
 		return
 	}
 
-	username, err := respBodyIsFatalField(c, respBody, "username")
+	username, err := common.RespBodyIsFatalField(c, respBody, "username")
 	if err != nil {
 		return
 	}
 
-	id, err := respBodyIsWrongField(c, respBody, "id")
+	id, err := common.RespBodyIsWrongField(c, respBody, "id")
 	if err != nil {
 		return
 	}
@@ -43,12 +43,12 @@ func ShortAdd(c *gin.Context) {
 		return
 	}
 
-	username, err := respBodyIsFatalField(c, respBody, "username")
+	username, err := common.RespBodyIsFatalField(c, respBody, "username")
 	if err != nil {
 		return
 	}
 
-	message, err := respBodyIsWrongField(c, respBody, "message")
+	message, err := common.RespBodyIsWrongField(c, respBody, "message")
 	if err != nil {
 		return
 	}
@@ -75,12 +75,12 @@ func ShortDelete(c *gin.Context) {
 		return
 	}
 
-	username, err := respBodyIsFatalField(c, respBody, "username")
+	username, err := common.RespBodyIsFatalField(c, respBody, "username")
 	if err != nil {
 		return
 	}
 
-	id, err := respBodyIsWrongField(c, respBody, "id")
+	id, err := common.RespBodyIsWrongField(c, respBody, "id")
 	if err != nil {
 		return
 	}
@@ -102,7 +102,7 @@ func ShortGetall(c *gin.Context) {
 		return
 	}
 
-	username, err := respBodyIsFatalField(c, respBody, "username")
+	username, err := common.RespBodyIsFatalField(c, respBody, "username")
 	if err != nil {
 		return
 	}
@@ -114,46 +114,4 @@ func ShortGetall(c *gin.Context) {
 			"body":   message,
 		})
 	}
-}
-
-
-
-
-func respBodyIsFatalField(c *gin.Context, respBody map[string]interface{}, field string) (string, error) { //check if client changed field of token
-																										   //if serv get it as valid token and reach this code then secret was found!
-	value, ok := respBody[field].(string)																   //usually will be used for username validation but maybe another cases in the future
-	if !ok {
-		common.CustomErrLog.Println("FATAL client try to change jwt", field, "field so it will store something else which means he have the jwt pass")
-		c.JSON(http.StatusBadRequest, gin.H{ 
-			"status": "access_is_true",
-			"body":   common.ErrBadRequest.Error(),
-		})
-		return "", common.ErrBadRequest
-		
-	}
-	if field == "username" && len(value) < 3 {
-		common.CustomErrLog.Println("FATAL client jwt not include username field but pass validation possible means that client got access secret also somehow stored less 3 char name?")
-		c.JSON(http.StatusBadRequest, gin.H{ 
-			"status": "access_is_true",
-			"body":   common.ErrBadRequest.Error(),
-		})
-		return "", common.ErrBadRequest
-	}
-	return value, nil
-
-}
-
-func respBodyIsWrongField(c *gin.Context, respBody map[string]interface{}, field string) (string, error) { //check if client changed field of header
-																										   //by default cause panic behavior but want to handle
-	field, ok := respBody[field].(string)
-	if !ok {
-		common.CustomErrLog.Println("wrong field in request, maybe client tried to change manually?", field)
-		c.JSON(http.StatusBadRequest, gin.H{ 
-			"status": "access_is_true",
-			"body":	"error: invalid field in header",
-		})
-		return "", common.ErrBadRequest
-	}
-	return field, nil
-
 }
