@@ -16,7 +16,7 @@ var (
 
 func ErrStatusChecker(err error, c *gin.Context) error {
 	if errors.Is(err, ErrNotFound) {
-		c.JSON(http.StatusOK, gin.H{	
+		c.JSON(http.StatusNotFound, gin.H{	
 			"status": "access_is_true",										
 			"body": err.Error(),
 		})
@@ -24,7 +24,7 @@ func ErrStatusChecker(err error, c *gin.Context) error {
 	if errors.Is(err, ErrInternalFailure) {
 		c.JSON(http.StatusInternalServerError, gin.H{	
 			"status": "access_is_true",										
-			"body": ErrInternalFailure.Error(),
+			"body": err.Error(),
 		})
 	}
 	if errors.Is(err, ErrBadRequest) {

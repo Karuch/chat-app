@@ -8,7 +8,6 @@ import (
 	"errors"
 	"net/http"
 	"github.com/gin-gonic/gin"
-	"fmt"
 )
 
 func RespBodyHandler(c *gin.Context) (map[string]interface{}, error) {
@@ -82,7 +81,7 @@ func tokenRecognizer(c *gin.Context) (bool, map[string]interface{}, error) { //t
 		}
 
 		respBody["username"] = parsedToken.Username
-		fmt.Println("reachhhhhhh")
+	
 		return true, respBody, nil
 
 	} else {

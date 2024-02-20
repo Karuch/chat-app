@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"main/common"
 	"main/redis"
 	"net/http"
@@ -27,7 +26,12 @@ func ShortGet(c *gin.Context) {
 	}
 
 	if haveAccess {
-		message := redis.Get(c, redis.DBconnect, username, id)
+		message, err := redis.Get(c, redis.DBconnect, username, id)
+		if err != nil {
+			common.CustomErrLog.Println(err)
+			common.ErrStatusChecker(err, c)
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": "access_is_true",
 			"body":   message,
@@ -37,7 +41,7 @@ func ShortGet(c *gin.Context) {
 
 func ShortAdd(c *gin.Context) {
 	haveAccess, respBody, err := tokenRecognizer(c)
-	fmt.Println(respBody)
+	
 	if err != nil { //force to login state
 		common.CustomErrLog.Println(err)
 		return
@@ -86,7 +90,12 @@ func ShortDelete(c *gin.Context) {
 	}
 
 	if haveAccess {
-		result := redis.Delete(c, redis.DBconnect, username, id)
+		result, err := redis.Delete(c, redis.DBconnect, username, id)
+		if err != nil {
+			common.CustomErrLog.Println(err)
+			common.ErrStatusChecker(err, c)
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": "access_is_true",
 			"body":   result,
@@ -108,7 +117,12 @@ func ShortGetall(c *gin.Context) {
 	}
 
 	if haveAccess {
-		message := redis.Getall(c, redis.DBconnect, username)
+		message, err := redis.Getall(c, redis.DBconnect, username)
+		if err != nil {
+			common.CustomErrLog.Println(err)
+			common.ErrStatusChecker(err, c)
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": "access_is_true",
 			"body":   message,
